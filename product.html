@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayt Tafsilotlari — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="marketplace.html#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">
+                        <span data-i18n="nav_login">Kirish</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <div class="product-breadcrumbs">
+                <a href="index.html">Asosiy</a>
+                <span>/</span>
+                <a href="marketplace.html">Marketplace</a>
+                <span>/</span>
+                <span id="breadcrumb-site-title" style="color: var(--text-primary); font-weight: 600;">Yuklanmoqda...</span>
+            </div>
+
+            <!-- Product Layout -->
+            <div class="product-layout">
+                
+                <!-- Left: Visual Preview & Detail Tabs -->
+                <div>
+                    <!-- Visual Switcher: Screenshot / Live Netlify Iframe -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button id="view-mode-screen" class="btn btn-sm btn-primary" onclick="setPreviewMode('screenshot')">🖼️ Rasm ko'rinishi</button>
+                            <button id="view-mode-live" class="btn btn-sm btn-secondary" onclick="setPreviewMode('live')">🌐 Netlify Live Preview</button>
+                        </div>
+                        <a id="btn-external-demo" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-outline">
+                            Yangi oynada ochish ↗
+                        </a>
+                    </div>
+
+                    <div class="preview-container">
+                        <!-- Screenshot Preview -->
+                        <div id="preview-image-box">
+                            <img id="product-main-img" src="" alt="Site Preview" style="width: 100%; height: 480px; object-fit: cover;">
+                        </div>
+                        <!-- Live Iframe Preview -->
+                        <div id="preview-iframe-box" style="display: none;">
+                            <iframe id="product-netlify-frame" class="preview-frame" src="" sandbox="allow-scripts allow-same-origin" title="Live Netlify Preview"></iframe>
+                        </div>
+                    </div>
+
+                    <!-- Detail Tabs: Tavsif | Xususiyatlar | Sharhlar -->
+                    <div class="product-tabs">
+                        <button class="product-tab active" id="tab-btn-desc" onclick="switchProductTab('desc')">Tavsif</button>
+                        <button class="product-tab" id="tab-btn-specs" onclick="switchProductTab('specs')">Xususiyatlar</button>
+                        <button class="product-tab" id="tab-btn-reviews" onclick="switchProductTab('reviews')">Sharhlar (3)</button>
+                    </div>
+
+                    <!-- Tab 1: Tavsif -->
+                    <div id="product-tab-desc" class="card" style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 14px;">Sayt haqida to'liq ma'lumot</h3>
+                        <p id="product-full-desc" style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;">
+                            Yuklanmoqda...
+                        </p>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 10px;">Sayt tarkibiga nimalar kiradi:</h4>
+                        <ul style="list-style: disc; padding-left: 20px; color: var(--text-secondary); line-height: 1.7;">
+                            <li>Barcha manba kodlari (HTML5, CSS3, JavaScript)</li>
+                            <li>To'liq moslashuvchan (Mobile, Tablet, Desktop) dizayn</li>
+                            <li>Barcha rasmlar va ikonkalarning litsenziyalangan nusxasi</li>
+                            <li>Domen va hostingga o'rnatish bo'yicha qo'llanma</li>
+                            <li>Saytni domeningizga bepul ulab berish xizmati</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tab 2: Xususiyatlar -->
+                    <div id="product-tab-specs" class="card" style="display: none; margin-bottom: 24px;">
+                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Texnik parametrlar</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div class="spec-box"><div class="spec-lbl">Dasturlash tillari</div><div class="spec-val" id="spec-tech">HTML5, CSS3, JS</div></div>
+                            <div class="spec-box"><div class="spec-lbl">Mobil moslashuvchanlik</div><div class="spec-val">100% Responsive</div></div>
+                            <div class="spec-box"><div class="spec-lbl">Brauzerlar</div><div class="spec-val">Chrome, Safari, Firefox, Edge</div></div>
+                            <div class="spec-box"><div class="spec-lbl">Yuklanish tezligi</div><div class="spec-val">98/100 (Google PageSpeed)</div></div>
+                            <div class="spec-box"><div class="spec-lbl">SEO tayyorgarlik</div><div class="spec-val">Schema.org, OpenGraph mavjud</div></div>
+                            <div class="spec-box"><div class="spec-lbl">Netlify / Vercel moslik</div><div class="spec-val">To'liq qo'llab-quvvatlanadi</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Sharhlar -->
+                    <div id="product-tab-reviews" class="card" style="display: none; margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 1.2rem; font-weight: 700;">Mijozlar sharhlari</h3>
+                            <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary);">⭐ 4.9 / 5.0</div>
+                        </div>
+
+                        <!-- Sample Reviews List -->
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <strong>Nodirbek Aliyev</strong>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">2 kun oldin</span>
+                                </div>
+                                <div style="color: #f59e0b; margin-bottom: 6px;">⭐⭐⭐⭐⭐</div>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary);">Saytni sotib oldim, dasturchi 3 soat ichida domenga ulab berdi. Kod juda toza va tushunarli. Rahmat!</p>
+                            </div>
+
+                            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <strong>Shahzod Mirzayev</strong>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">1 hafta oldin</span>
+                                </div>
+                                <div style="color: #f59e0b; margin-bottom: 6px;">⭐⭐⭐⭐⭐</div>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary);">Dizayn juda zamonaviy, mijozlarimizga judayam ma'qul keldi. Narxi sifatiga nisbatan juda arzon.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Pricing, 10 Extras, Buy Button, Developer Card -->
+                <aside class="product-sidebar-sticky">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <span id="product-category-badge" class="badge" style="background: var(--primary-light); color: var(--primary);">
+                                KATEGORIYA
+                            </span>
+                            <button id="product-fav-toggle" class="btn btn-sm btn-secondary" onclick="toggleCurrentProductFav()" title="Sevimlilar">
+                                ❤️
+                            </button>
+                        </div>
+
+                        <h1 id="product-title" style="font-size: 1.45rem; font-weight: 800; line-height: 1.3; margin-bottom: 12px;">
+                            Yuklanmoqda...
+                        </h1>
+
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px;">
+                            <span id="product-rating-box" style="font-weight: 700; font-size: 0.95rem;">⭐ 4.9</span>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">|</span>
+                            <span id="product-sales-box" style="color: var(--text-secondary); font-size: 0.85rem;">24 ta muvaffaqiyatli sotuv</span>
+                        </div>
+
+                        <!-- Price display -->
+                        <div style="background: var(--bg-tertiary); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 20px;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Asosiy sayt narxi:</div>
+                            <div id="product-base-price" style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">
+                                0 so'm
+                            </div>
+                        </div>
+
+                        <!-- Specifications Grid -->
+                        <div class="specs-grid">
+                            <div class="spec-box">
+                                <div class="spec-lbl">Yetkazish</div>
+                                <div class="spec-val">⚡ 24 soatda</div>
+                            </div>
+                            <div class="spec-box">
+                                <div class="spec-lbl">Domen</div>
+                                <div class="spec-val">🌐 .UZ kiritilgan</div>
+                            </div>
+                            <div class="spec-box">
+                                <div class="spec-lbl">Format</div>
+                                <div class="spec-val">📦 Tayyor kod</div>
+                            </div>
+                            <div class="spec-box">
+                                <div class="spec-lbl">Xavfsizlik</div>
+                                <div class="spec-val">🛡️ Escrow kafolat</div>
+                            </div>
+                        </div>
+
+                        <!-- 10 Additional Extras Checkboxes -->
+                        <div style="margin-top: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="font-size: 0.95rem; font-weight: 700;">Qo'shimcha xizmatlar (ixtiyoriy):</h4>
+                                <span style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">10 ta variant</span>
+                            </div>
+
+                            <div class="extras-list" id="extras-container">
+                                <!-- 10 Checkboxes will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Total Calculation Box -->
+                        <div style="border-top: 2px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <span style="font-size: 1rem; font-weight: 700;">JAMI SUMMA:</span>
+                                <span id="product-total-price" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">0 so'm</span>
+                            </div>
+
+                            <button onclick="proceedToCheckout()" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 10px;">
+                                🛒 Saytni Sotib Olish
+                            </button>
+
+                            <button onclick="contactDeveloper()" class="btn btn-secondary btn-block">
+                                💬 Dasturchi bilan bog'lanish
+                            </button>
+                        </div>
+
+                        <!-- Developer Card -->
+                        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 14px;">
+                            <div id="dev-card-avatar" class="user-avatar" style="width: 48px; height: 48px; font-size: 1.2rem;">D</div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong id="dev-card-name">Azizbek Rahimov</strong>
+                                    <span class="badge badge-verified">✓</span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                    Top dasturchi • 38 ta sotuv • 4.95 ★
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub Marketplace. Barcha huquqlar himoyalangan.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Foydalanish shartlari</a>
+                    <a href="support.html">Yordam</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        let currentSite = null;
+        let selectedExtrasSum = 0;
+        let selectedExtrasIds = [];
+
+        // 10 Extra Services
+        const EXTRAS_OPTIONS = [
+            { id: "ext-1", name: "Logo tayyorlash", price: 150000 },
+            { id: "ext-2", name: "Korporativ ranglarni moslashtirish", price: 100000 },
+            { id: "ext-3", name: "Boshlang'ich kontent yuklash", price: 200000 },
+            { id: "ext-4", name: "Qidiruv tizimlari (SEO) optimizatsiyasi", price: 300000 },
+            { id: "ext-5", name: "Maxsus .UZ domen ro'yxatdan o'tkazish", price: 120000 },
+            { id: "ext-6", name: "Yillik xavfsiz SSD Hosting", price: 250000 },
+            { id: "ext-7", name: "Telegram buyurtma boti integratsiyasi", price: 350000 },
+            { id: "ext-8", name: "Click va Payme to'lov tizimlarini ulash", price: 400000 },
+            { id: "ext-9", name: "Qo'shimcha 3 ta sahifa yaratish", price: 250000 },
+            { id: "ext-10", name: "3 oylik bepul texnik qo'llab-quvvatlash", price: 180000 }
+        ];
+
+        function initExtrasCheckboxes() {
+            const container = document.getElementById('extras-container');
+            container.innerHTML = EXTRAS_OPTIONS.map(opt => `
+                <label class="extra-item">
+                    <div class="extra-info">
+                        <input type="checkbox" value="${opt.id}" data-price="${opt.price}" onchange="recalculateTotal()" id="chk-${opt.id}">
+                        <span>${opt.name}</span>
+                    </div>
+                    <div class="extra-price">+${siteHub.formatPrice(opt.price)}</div>
+                </label>
+            `).join('');
+        }
+
+        function recalculateTotal() {
+            selectedExtrasSum = 0;
+            selectedExtrasIds = [];
+
+            document.querySelectorAll('#extras-container input[type="checkbox"]:checked').forEach(cb => {
+                selectedExtrasSum += Number(cb.getAttribute('data-price'));
+                selectedExtrasIds.push(cb.value);
+            });
+
+            if (currentSite) {
+                const total = currentSite.price + selectedExtrasSum;
+                document.getElementById('product-total-price').textContent = siteHub.formatPrice(total);
+            }
+        }
+
+        function setPreviewMode(mode) {
+            const imgBox = document.getElementById('preview-image-box');
+            const frameBox = document.getElementById('preview-iframe-box');
+            const btnScreen = document.getElementById('view-mode-screen');
+            const btnLive = document.getElementById('view-mode-live');
+
+            if (mode === 'live') {
+                imgBox.style.display = 'none';
+                frameBox.style.display = 'block';
+                btnLive.classList.add('btn-primary');
+                btnLive.classList.remove('btn-secondary');
+                btnScreen.classList.remove('btn-primary');
+                btnScreen.classList.add('btn-secondary');
+            } else {
+                imgBox.style.display = 'block';
+                frameBox.style.display = 'none';
+                btnScreen.classList.add('btn-primary');
+                btnScreen.classList.remove('btn-secondary');
+                btnLive.classList.remove('btn-primary');
+                btnLive.classList.add('btn-secondary');
+            }
+        }
+
+        function switchProductTab(tab) {
+            ['desc', 'specs', 'reviews'].forEach(t => {
+                document.getElementById(`product-tab-${t}`).style.display = (t === tab) ? 'block' : 'none';
+                document.getElementById(`tab-btn-${t}`).classList.toggle('active', t === tab);
+            });
+        }
+
+        function toggleCurrentProductFav() {
+            if (!currentSite) return;
+            siteHub.toggleFavorite(currentSite.id);
+            updateFavBtnState();
+        }
+
+        function updateFavBtnState() {
+            if (!currentSite) return;
+            const btn = document.getElementById('product-fav-toggle');
+            const isFav = siteHub.isFavorite(currentSite.id);
+            btn.innerHTML = isFav ? '❤️ Sevimlilarda' : '🤍 Sevimlilarga qo\'shish';
+            btn.style.color = isFav ? '#ec4899' : 'inherit';
+        }
+
+        function proceedToCheckout() {
+            if (!currentSite) return;
+            const extrasParam = selectedExtrasIds.join(',');
+            window.location.href = `checkout.html?siteId=${currentSite.id}&extras=${encodeURIComponent(extrasParam)}`;
+        }
+
+        function contactDeveloper() {
+            if (!currentSite) return;
+            window.location.href = `chat.html?devId=${currentSite.developer_id}&siteId=${currentSite.id}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initExtrasCheckboxes();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const siteId = urlParams.get('id') || 'site-001';
+
+            currentSite = siteHub.getSiteById(siteId);
+            if (!currentSite) {
+                currentSite = siteHub.getSites()[0];
+            }
+
+            if (currentSite) {
+                document.title = `${currentSite.title} — SiteHub`;
+                document.getElementById('breadcrumb-site-title').textContent = currentSite.title;
+                document.getElementById('product-title').textContent = currentSite.title;
+                document.getElementById('product-category-badge').textContent = currentSite.category_slug.toUpperCase();
+                document.getElementById('product-full-desc').textContent = currentSite.description;
+                document.getElementById('product-base-price').textContent = siteHub.formatPrice(currentSite.price);
+                document.getElementById('product-total-price').textContent = siteHub.formatPrice(currentSite.price);
+                document.getElementById('product-rating-box').textContent = `⭐ ${currentSite.rating} / 5.0`;
+                document.getElementById('product-sales-box').textContent = `${currentSite.sales_count} ta muvaffaqiyatli sotuv`;
+
+                // Screenshots & Netlify preview
+                document.getElementById('product-main-img').src = currentSite.screenshots[0];
+                document.getElementById('product-netlify-frame').src = currentSite.netlify_url || currentSite.demo_url;
+                document.getElementById('btn-external-demo').href = currentSite.netlify_url || currentSite.demo_url;
+
+                // Specs
+                if (currentSite.tech && currentSite.tech.length > 0) {
+                    document.getElementById('spec-tech').textContent = currentSite.tech.join(', ');
+                }
+
+                // Dev Card
+                document.getElementById('dev-card-name').textContent = currentSite.developer_name;
+                document.getElementById('dev-card-avatar').textContent = currentSite.developer_avatar || 'D';
+
+                updateFavBtnState();
+            }
+        });
+    </script>
+</body>
+</html>

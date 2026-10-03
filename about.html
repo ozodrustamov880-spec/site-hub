@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biz Haqimizda — SiteHub Marketplace</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="marketplace.html#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link active" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">Kirish</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="section" style="padding-bottom: 40px; text-align: center;">
+            <div class="container container-sm">
+                <div class="badge badge-verified" style="margin-bottom: 14px;">SITEHUB EKOTIZIMI</div>
+                <h1 style="font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">
+                    SiteHub haqida to'liq ma'lumot
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 1.15rem; line-height: 1.6;">
+                    O'zbekistonda web-ishlab chiqish sohasini inqilobiy o'zgartiruvchi tayyor web-saytlar birinchi milliy marketplace'i.
+                </p>
+            </div>
+        </section>
+
+        <!-- Gradient Info Banner + Stats -->
+        <section class="section-sm">
+            <div class="container">
+                <div class="cta-banner" style="text-align: left; padding: 50px 40px;">
+                    <div style="max-width: 800px;">
+                        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 16px;">SiteHub nima?</h2>
+                        <p style="font-size: 1.1rem; line-height: 1.7; opacity: 0.95; margin-bottom: 30px;">
+                            SiteHub — dasturchilar o'zlarining professional tayyor veb-saytlarini sota oladigan, tadbirkorlar va startaplar esa agentliklarga oylab vaqt va millionlab so'm sarflamasdan, atigi 1 kunda o'z bizneslari uchun ishchi saytni qulay narxda xarid qila oladigan ochiq platformadir.
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; border-top: 1px solid rgba(255,255,255,0.25); padding-top: 24px;">
+                        <div>
+                            <div style="font-size: 2.2rem; font-weight: 800;">500+</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Tayyor web-saytlar</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.2rem; font-weight: 800;">2,400+</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Mamnun xaridorlar</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.2rem; font-weight: 800;">24 soat</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Domen ulash tezligi</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2.2rem; font-weight: 800;">100%</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9;">Escrow xavfsiz to'lov</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5-Step Process (Qanday ishlaydi?) -->
+        <section class="section" id="process" style="background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; max-width: 650px; margin: 0 auto 50px;">
+                    <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 12px;">5 Bosqichli Xarid Jarayoni</h2>
+                    <p style="color: var(--text-secondary);">Sayt tanlashdan boshlab to'liq ishga tushirishgacha bo'lgan qadamlar</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                    <div class="card" style="position: relative;">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 10px;">01</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Saytni Tanlash</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            Katalogdan sohangizga mos saytni tanlang va jonli Netlify demo orqali dizaynini tekshiring.
+                        </p>
+                    </div>
+
+                    <div class="card" style="position: relative;">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 10px;">02</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Xavfsiz To'lov</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            Click, Payme yoki bank kartasi orqali to'lov qilasiz. Pul platformaning Escrow hisobida muzlatiladi.
+                        </p>
+                    </div>
+
+                    <div class="card" style="position: relative;">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 10px;">03</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Dasturchi Bilan Aloqa</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            Sayt yaratuvchisi bilan qulay ichki chatda bog'lanib, o'z logotipingiz va matnlaringizni yuborasiz.
+                        </p>
+                    </div>
+
+                    <div class="card" style="position: relative;">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 10px;">04</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Domen Sozlash</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            Dasturchi siz istagan (.uz / .com) domenni ro'yxatdan o'tkazib, saytni unga to'liq ulab beradi.
+                        </p>
+                    </div>
+
+                    <div class="card" style="position: relative;">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--success); margin-bottom: 10px;">05</div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">Tasdiqlash & Tayyor</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            Saytingizni o'z domeningizda tekshirib tasdiqlaysiz. Shundan so'nggina mablag' dasturchiga o'tadi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platform Service Fee Explanation (NO KOMISSIYA WORD) -->
+        <section class="section" id="service-fee">
+            <div class="container container-sm">
+                <div class="card" style="padding: 40px; border-left: 6px solid var(--primary);">
+                    <div class="badge badge-verified" style="margin-bottom: 10px;">SHAFFAF MODEL</div>
+                    <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 14px;">Platforma Xizmat Haqi Haqida</h2>
+                    <p style="color: var(--text-secondary); font-size: 1rem; line-height: 1.7; margin-bottom: 24px;">
+                        SiteHub platformasida barcha moliyaviy hisob-kitoblar to'liq ochiq va shaffof olib boriladi. Platforma xavfsiz Escrow tranzaksiyalarini ta'minlash, moderatorlar tomonidan saytlar sifatini nazorat qilish va kechayu-kunduz texnik qo'llab-quvvatlash uchun har bir bitimdan kichik belgilangan xizmat haqi oladi.
+                    </p>
+
+                    <div style="background: var(--bg-tertiary); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <div style="font-weight: 700; margin-bottom: 12px; font-size: 1.05rem;">Misol uchun amaliy taqsimot:</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Mijoz tomonidan to'langan umumiy qiymat:</span>
+                                <strong>100,000 so'm</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: var(--primary);">
+                                <span>Platforma xizmat haqi:</span>
+                                <strong>10,000 so'm</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; color: var(--success); font-weight: 700;">
+                                <span>Dasturchiga to'liq yetkaziladigan mablag':</span>
+                                <strong>90,000 so'm</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4 Guarantees -->
+        <section class="section" style="background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; max-width: 650px; margin: 0 auto 40px;">
+                    <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">SiteHub Rasmiy Kafolatlari</h2>
+                    <p style="color: var(--text-secondary);">Har bir xaridor va dasturchi huquqlari qonuniy himoyalangan</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🛡️</div>
+                        <h3 class="feature-title">100% Escrow Himoyasi</h3>
+                        <p class="feature-desc">Mijoz saytni qabul qilib, shaxsan tasdiqlamaguncha, dasturchi pulni yechib ololmaydi.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🧹</div>
+                        <h3 class="feature-title">Toza Manba Kod</h3>
+                        <p class="feature-desc">Ortiqcha framework va kutubxonalarsiz, eng toza HTML5, CSS3 va JavaScript kodlari taqdim etiladi.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">📱</div>
+                        <h3 class="feature-title">Barcha Qurilmalarga Mos</h3>
+                        <p class="feature-desc">Barcha saytlar smartfon, planshet, noutbuk va katta ekranlarda mukammal moslashuvchan ishlaydi.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🤝</div>
+                        <h3 class="feature-title">Nizolarni Hal Qilish</h3>
+                        <p class="feature-desc">Har qanday tushunmovchilik yuzaga kelganda, SiteHub arbitraj jamoasi xolis tarzda yordam beradi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Question Block -->
+        <section class="section">
+            <div class="container">
+                <div class="cta-banner" style="text-align: center;">
+                    <h2 class="cta-title">Savollaringiz bormi?</h2>
+                    <p class="cta-desc">Qo'llab-quvvatlash xizmati mutaxassislari sizga to'g'ri sayt tanlashda yordam berishga tayyor.</p>
+                    <div class="cta-buttons">
+                        <a href="support.html" class="btn btn-white btn-lg">📞 Biz bilan bog'lanish</a>
+                        <a href="marketplace.html" class="btn btn-transparent btn-lg">🛍️ Marketplace'ga o'tish</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub Marketplace. Barcha huquqlar himoyalangan.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Foydalanish shartlari</a>
+                    <a href="support.html">Qo'llab-quvvatlash</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>

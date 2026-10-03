@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mijoz Kabineti — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <div style="font-weight: 700; color: var(--primary);">
+                👤 Mijoz Boshqaruv Paneli
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <div id="header-auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <div class="dash-menu">
+                <a href="#orders" class="dash-menu-item active" id="menu-orders" onclick="switchCustomerTab('orders')">
+                    <span>🏠</span>
+                    <span>Mening Buyurtmalarim</span>
+                </a>
+                <a href="#favorites" class="dash-menu-item" id="menu-favs" onclick="switchCustomerTab('favorites')">
+                    <span>❤️</span>
+                    <span>Sevimlilar (<span id="cust-fav-count">0</span>)</span>
+                </a>
+                <a href="chat.html" class="dash-menu-item">
+                    <span>💬</span>
+                    <span>Xabarlar & Chat</span>
+                </a>
+                <a href="marketplace.html" class="dash-menu-item">
+                    <span>🛍️</span>
+                    <span>Marketplace</span>
+                </a>
+            </div>
+
+            <div>
+                <button onclick="siteHub.logout()" class="btn btn-secondary btn-block">
+                    🚪 Chiqish
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <main class="dashboard-main">
+            <!-- 4 Stats Cards -->
+            <div class="dashboard-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">📦</div>
+                    <div>
+                        <div class="stat-val" id="stat-total-orders">0</div>
+                        <div class="stat-lbl">Jami Buyurtmalar</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">⚡</div>
+                    <div>
+                        <div class="stat-val" id="stat-active-orders">0</div>
+                        <div class="stat-lbl">Faol Buyurtmalar</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(236,72,153,0.15); color: #ec4899;">❤️</div>
+                    <div>
+                        <div class="stat-val" id="stat-fav-count">0</div>
+                        <div class="stat-lbl">Sevimlilar</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-light); color: var(--success);">💰</div>
+                    <div>
+                        <div class="stat-val" id="stat-total-spent">0 so'm</div>
+                        <div class="stat-lbl">Sarflangan Mablag'</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Orders Section -->
+            <div id="section-orders">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.4rem; font-weight: 800;">Mening Buyurtmalarim</h2>
+                    <a href="marketplace.html" class="btn btn-primary btn-sm">+ Yangi sayt xarid qilish</a>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th># Buyurtma</th>
+                                <th>Sayt nomi</th>
+                                <th>Summa</th>
+                                <th>Holat</th>
+                                <th>Domen holati</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-orders-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Favorites Section -->
+            <div id="section-favorites" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 1.4rem; font-weight: 800;">Saqlangan Sevimli Saytlar</h2>
+                    <span style="font-size: 0.9rem; color: var(--text-secondary);" id="favs-heading-count">0 ta sayt</span>
+                </div>
+
+                <div class="sites-grid" id="customer-favorites-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Domain Confirmation Modal -->
+    <div class="modal-backdrop" id="modal-domain-confirm">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Domen va Saytni Tasdiqlash</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-domain-confirm')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Sayt va domen:</div>
+                    <div id="modal-conf-title" style="font-weight: 700; font-size: 1.1rem; margin-top: 2px;">Sayt</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
+                        <span id="modal-conf-domain" style="font-weight: 800; color: var(--primary); font-size: 1.15rem;">domain.uz</span>
+                        <a id="modal-conf-link" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-outline">
+                            🌐 Saytni yangi oynada ochish ↗
+                        </a>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                    Dasturchi sizning domeningizni to'liq sozlab, saytni ishchi holatga keltirdi. Iltimos, havola orqali saytni tekshirib chiqing va tasdiqlang. Tasdiqlaganingizdan so'ng, muzlatilgan mablag' dasturchiga o'tkaziladi.
+                </p>
+
+                <label class="checkbox-label" style="font-weight: 600;">
+                    <input type="checkbox" id="chk-confirm-domain-verified" onchange="toggleConfirmButton()">
+                    <span>Men domenni to'liq tekshirdim va sayt mukammal ishlayotganini tasdiqlayman</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-domain-confirm')">Bekor qilish</button>
+                <button type="button" id="btn-submit-confirm-domain" class="btn btn-success" onclick="executeDomainConfirmation()" disabled>
+                    ✓ Tasdiqlash va Qabul Qilish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="javascript:void(0)" onclick="switchCustomerTab('favorites')" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item active">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        let confirmingOrderId = null;
+
+        function switchCustomerTab(tab) {
+            const secOrders = document.getElementById('section-orders');
+            const secFavs = document.getElementById('section-favorites');
+            const menuOrders = document.getElementById('menu-orders');
+            const menuFavs = document.getElementById('menu-favs');
+
+            if (tab === 'favorites') {
+                secOrders.style.display = 'none';
+                secFavs.style.display = 'block';
+                menuOrders.classList.remove('active');
+                menuFavs.classList.add('active');
+                renderCustomerFavorites();
+            } else {
+                secOrders.style.display = 'block';
+                secFavs.style.display = 'none';
+                menuOrders.classList.add('active');
+                menuFavs.classList.remove('active');
+                renderCustomerOrders();
+            }
+        }
+
+        function renderCustomerStats(orders) {
+            const totalOrders = orders.length;
+            const activeOrders = orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'CANCELLED').length;
+            const totalSpent = orders.reduce((acc, o) => acc + (o.total || 0), 0);
+            const favCount = siteHub.favorites.length;
+
+            document.getElementById('stat-total-orders').textContent = totalOrders;
+            document.getElementById('stat-active-orders').textContent = activeOrders;
+            document.getElementById('stat-fav-count').textContent = favCount;
+            document.getElementById('cust-fav-count').textContent = favCount;
+            document.getElementById('stat-total-spent').textContent = siteHub.formatPrice(totalSpent);
+        }
+
+        function renderCustomerOrders() {
+            const orders = siteHub.getOrders();
+            renderCustomerStats(orders);
+
+            const tbody = document.getElementById('customer-orders-tbody');
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            Hozircha buyurtmalar yo'q. Marketplace'dan o'zingizga yoqqan saytni tanlang!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(ord => {
+                let statusBadge = '<span class="badge badge-pending">Kutilmoqda</span>';
+                if (ord.status === 'PAID') statusBadge = '<span class="badge" style="background: var(--info); color: #fff;">To\'langan</span>';
+                else if (ord.status === 'PROCESSING') statusBadge = '<span class="badge" style="background: var(--warning-light); color: var(--warning);">Jarayonda</span>';
+                else if (ord.status === 'COMPLETED') statusBadge = '<span class="badge badge-approved">Yakunlandi</span>';
+
+                let domainHtml = `<span style="font-weight: 600;">${ord.domain_name}</span>`;
+                let actionBtn = '';
+
+                if (ord.domain_status === 'CONFIGURED') {
+                    domainHtml += ` <span class="badge" style="background: var(--primary-light); color: var(--primary);">Sozlandi</span>`;
+                    actionBtn = `
+                        <button class="btn btn-sm btn-success" onclick="openDomainConfirmModal('${ord.id}')">
+                            ✓ Tasdiqlash
+                        </button>
+                    `;
+                } else if (ord.domain_status === 'COMPLETED') {
+                    domainHtml += ` <span class="badge badge-approved">Faol</span>`;
+                    actionBtn = `
+                        <a href="https://${ord.domain_name}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">
+                            🌐 Ochish ↗
+                        </a>
+                    `;
+                } else {
+                    domainHtml += ` <span class="badge badge-pending">Kutilmoqda</span>`;
+                    actionBtn = `
+                        <a href="chat.html?orderId=${ord.id}" class="btn btn-sm btn-secondary">
+                            💬 Chat
+                        </a>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${ord.order_number}</strong></td>
+                        <td>${ord.site_title}</td>
+                        <td style="font-weight: 700; color: var(--primary);">${siteHub.formatPrice(ord.total)}</td>
+                        <td>${statusBadge}</td>
+                        <td>${domainHtml}</td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openDomainConfirmModal(orderId) {
+            const order = siteHub.getOrders().find(o => o.id === orderId);
+            if (!order) return;
+
+            confirmingOrderId = orderId;
+            document.getElementById('modal-conf-title').textContent = order.site_title;
+            document.getElementById('modal-conf-domain').textContent = order.domain_name;
+            document.getElementById('modal-conf-link').href = `https://${order.domain_name}`;
+            document.getElementById('chk-confirm-domain-verified').checked = false;
+            document.getElementById('btn-submit-confirm-domain').setAttribute('disabled', 'true');
+
+            siteHub.openModal('modal-domain-confirm');
+        }
+
+        function toggleConfirmButton() {
+            const checked = document.getElementById('chk-confirm-domain-verified').checked;
+            const btn = document.getElementById('btn-submit-confirm-domain');
+            if (checked) btn.removeAttribute('disabled');
+            else btn.setAttribute('disabled', 'true');
+        }
+
+        function executeDomainConfirmation() {
+            if (!confirmingOrderId) return;
+            const order = siteHub.getOrders().find(o => o.id === confirmingOrderId);
+            if (order) {
+                order.domain_status = 'COMPLETED';
+                order.status = 'COMPLETED';
+                siteHub.saveOrder(order);
+
+                siteHub.closeModal('modal-domain-confirm');
+                siteHub.playNotificationSound();
+                siteHub.showToast("Sayt muvaffaqiyatli qabul qilindi va ishga tushirildi! 🎉", "success");
+                renderCustomerOrders();
+            }
+        }
+
+        function renderCustomerFavorites() {
+            const favIds = siteHub.favorites;
+            const allSites = siteHub.getSites();
+            const favSites = allSites.filter(s => favIds.includes(s.id));
+            const grid = document.getElementById('customer-favorites-grid');
+            document.getElementById('favs-heading-count').textContent = `${favSites.length} ta sayt`;
+
+            if (favSites.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🤍</div>
+                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">Sevimlilar ro'yxati bo'sh</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">O'zingizga ma'qul kelgan saytlarni ❤️ belgisi orqali saqlab qo'ying.</p>
+                        <a href="marketplace.html" class="btn btn-primary">Marketplace'ga o'tish</a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = favSites.map(site => `
+                <div class="site-card">
+                    <div class="site-thumb-wrapper">
+                        <img src="${site.screenshots[0]}" alt="${site.title}" class="site-thumb">
+                    </div>
+                    <div class="site-body">
+                        <span class="site-category-tag">${site.category_slug.toUpperCase()}</span>
+                        <h3 class="site-title">${site.title}</h3>
+                        <div class="site-meta-row">
+                            <div class="site-price">${siteHub.formatPrice(site.price)}</div>
+                        </div>
+                        <div class="site-actions-row">
+                            <a href="product.html?id=${site.id}" class="btn btn-primary btn-sm">Batafsil</a>
+                            <button onclick="siteHub.toggleFavorite('${site.id}'); renderCustomerFavorites();" class="btn btn-secondary btn-sm">
+                                🗑️ O'chirish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCustomerOrders();
+
+            if (window.location.hash === '#favorites') {
+                switchCustomerTab('favorites');
+            }
+        });
+    </script>
+</body>
+</html>

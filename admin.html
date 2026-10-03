@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Boshqaruv Markazi — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">A</div>
+                <span class="logo-text">SiteHub Admin</span>
+            </a>
+
+            <div style="font-weight: 700; color: var(--danger);">
+                👑 Ma'muriyat Tizimi (Super Admin)
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <div id="header-auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <div class="dash-menu">
+                <a href="#overview" class="dash-menu-item active" id="menu-admin-overview" onclick="switchAdminTab('overview')">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="javascript:void(0)" class="dash-menu-item" onclick="siteHub.openModal('modal-admin-commission')">
+                    <span>⚙️</span>
+                    <span>Komissiya & Xizmat haqi</span>
+                </a>
+                <a href="javascript:void(0)" class="dash-menu-item" onclick="siteHub.openModal('modal-admin-card')">
+                    <span>💳</span>
+                    <span>Platforma kartasi</span>
+                </a>
+            </div>
+
+            <div>
+                <button onclick="siteHub.logout()" class="btn btn-secondary btn-block">
+                    🚪 Chiqish
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <main class="dashboard-main">
+            <!-- 4 Admin Stats Cards -->
+            <div class="dashboard-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-light); color: var(--success);">💰</div>
+                    <div>
+                        <div class="stat-val" id="stat-admin-commission">0 so'm</div>
+                        <div class="stat-lbl">Jami Platforma Foydasi</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">⏳</div>
+                    <div>
+                        <div class="stat-val" id="stat-admin-pending">0</div>
+                        <div class="stat-lbl">Moderatsiyadagi Saytlar</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">📦</div>
+                    <div>
+                        <div class="stat-val" id="stat-admin-orders">0</div>
+                        <div class="stat-lbl">Jami Buyurtmalar</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(168,85,247,0.15); color: #a855f7;">👥</div>
+                    <div>
+                        <div class="stat-val" id="stat-admin-users">240</div>
+                        <div class="stat-lbl">Foydalanuvchilar</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Commission Settings Status Banner -->
+            <div class="card" style="margin-bottom: 32px; background: var(--gradient-subtle); border-color: var(--primary-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">Platforma Moliyaviy Holati</div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; margin-top: 4px;">
+                            Har bir bitimdan xizmat haqi: <span id="admin-banner-fee" style="color: var(--primary);">10,000 so'm (Belgilangan)</span>
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
+                            Qabul qiluvchi karta: <strong id="admin-banner-card">8600 4501 2289 7712</strong> (SITEHUB MARKETPLACE MCHJ)
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="siteHub.openModal('modal-admin-commission')">⚙️ Sozlash</button>
+                        <button class="btn btn-secondary btn-sm" onclick="siteHub.openModal('modal-admin-card')">💳 Kartani o'zgartirish</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. Moderation Queue (PENDING sites) -->
+            <div style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <h2 style="font-size: 1.4rem; font-weight: 800;">Moderatsiya Navbati (Yangi Saytlar)</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Dasturchilar tomonidan yuklangan va tasdiq kutayotgan shablonlar</p>
+                    </div>
+                    <span class="badge badge-pending" id="badge-pending-count">0 ta kutilmoqda</span>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Sayt nomi</th>
+                                <th>Dasturchi</th>
+                                <th>Kategoriya</th>
+                                <th>Narx</th>
+                                <th>Netlify Live Demo</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-pending-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Orders & Payouts (Escrow distribution) -->
+            <div style="margin-bottom: 40px;">
+                <div style="margin-bottom: 16px;">
+                    <h2 style="font-size: 1.4rem; font-weight: 800;">Buyurtmalar va Mablag' Taqsimoti</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Mijoz to'lovlari, platforma komissiyasi va dasturchiga to'lov holati</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th># Buyurtma</th>
+                                <th>Mijoz</th>
+                                <th>Dasturchi</th>
+                                <th>Jami Summa</th>
+                                <th>Xizmat haqi</th>
+                                <th>Dasturchiga</th>
+                                <th>Holat</th>
+                                <th>Amal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. User Management Table -->
+            <div>
+                <div style="margin-bottom: 16px;">
+                    <h2 style="font-size: 1.4rem; font-weight: 800;">Foydalanuvchilar Boshqaruvi</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Mijozlar va dasturchilarni nazorat qilish hamda bloklash</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Foydalanuvchi</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Holati</th>
+                                <th>Amal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Commission Settings -->
+    <div class="modal-backdrop" id="modal-admin-commission">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Xizmat Haqi (Komissiya) Sozlamasi</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-admin-commission')">✕</button>
+            </div>
+            <form onsubmit="handleSaveCommission(event)">
+                <div class="modal-body">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+                        Platforma har bir sayt sotuvidan oladigan xizmat haqini belgilang.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">Hisoblash turi</label>
+                        <select id="comm-type-select" class="form-select" onchange="updateCommissionPreview()">
+                            <option value="fixed">Belgilangan summa (Fixed UZS)</option>
+                            <option value="percent">Foiz stavkasi (Percent %)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" id="comm-amount-lbl">Summa (so'mda)</label>
+                        <input type="number" id="comm-amount-input" class="form-input" value="10000" min="1" step="1000" oninput="updateCommissionPreview()" required>
+                    </div>
+
+                    <!-- Live Calculation Preview -->
+                    <div style="background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.9rem;">
+                        <div style="font-weight: 700; margin-bottom: 6px;">Misol: 2,000,000 so'mlik sayt sotilganda:</div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Platforma xizmat haqi:</span>
+                            <strong id="preview-comm-fee" style="color: var(--primary);">10,000 so'm</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Dasturchiga to'lanadi:</span>
+                            <strong id="preview-dev-payout" style="color: var(--success);">1,990,000 so'm</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-admin-commission')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Platform Bank Card Setup -->
+    <div class="modal-backdrop" id="modal-admin-card">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Platforma Rasmiy Kartasi</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-admin-card')">✕</button>
+            </div>
+            <form onsubmit="handleSavePlatformCard(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Karta raqami (16 xonali)</label>
+                        <input type="text" id="admin-card-number-input" class="form-input" placeholder="8600 0000 0000 0000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Karta egasi tashkilot / shaxs</label>
+                        <input type="text" id="admin-card-holder-input" class="form-input" placeholder="SITEHUB MARKETPLACE MCHJ" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bank nomi</label>
+                        <input type="text" id="admin-card-bank-input" class="form-input" placeholder="Kapitalbank ATB" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-admin-card')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Yangilash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let demoUsers = [
+            { id: 'u-1', name: 'Otabek Umarov', email: 'otabek@client.uz', role: 'customer', blocked: false },
+            { id: 'u-2', name: 'Azizbek Rahimov', email: 'azizbek@dev.uz', role: 'developer', blocked: false },
+            { id: 'u-3', name: 'Malika Sobirova', email: 'malika@dev.uz', role: 'developer', blocked: false },
+            { id: 'u-4', name: 'Jasur Qodirov', email: 'jasur@dev.uz', role: 'developer', blocked: false },
+            { id: 'u-5', name: 'Nodirbek Aliyev', email: 'nodir@gmail.com', role: 'customer', blocked: false }
+        ];
+
+        function renderAdminDashboard() {
+            const sites = siteHub.getSites();
+            const orders = siteHub.getOrders();
+            const settings = siteHub.getSettings();
+
+            // Total platform revenue from orders
+            const totalCommissionEarned = orders.reduce((sum, o) => sum + (o.commission_amount || 0), 0);
+            const pendingSites = sites.filter(s => s.status === 'PENDING');
+
+            document.getElementById('stat-admin-commission').textContent = siteHub.formatPrice(totalCommissionEarned);
+            document.getElementById('stat-admin-pending').textContent = pendingSites.length;
+            document.getElementById('badge-pending-count').textContent = `${pendingSites.length} ta kutilmoqda`;
+            document.getElementById('stat-admin-orders').textContent = orders.length;
+
+            // Update banner
+            const feeText = settings.commission_type === 'percent' 
+                ? `${settings.commission_amount}% (Foiz)` 
+                : `${siteHub.formatPrice(settings.commission_amount || 10000)} (Belgilangan)`;
+            document.getElementById('admin-banner-fee').textContent = feeText;
+            document.getElementById('admin-banner-card').textContent = settings.platform_card || '8600 4501 2289 7712';
+
+            // 1. Pending sites table
+            const pendingTbody = document.getElementById('admin-pending-tbody');
+            if (pendingSites.length === 0) {
+                pendingTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Hozirda moderatsiya uchun yangi saytlar mavjud emas. Hammasi tasdiqlangan!</td></tr>`;
+            } else {
+                pendingTbody.innerHTML = pendingSites.map(s => `
+                    <tr>
+                        <td><strong>${s.title}</strong></td>
+                        <td>${s.developer_name}</td>
+                        <td>${s.category_slug.toUpperCase()}</td>
+                        <td style="font-weight: 700; color: var(--primary);">${siteHub.formatPrice(s.price)}</td>
+                        <td><a href="${s.netlify_url}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">🌐 Ochish ↗</a></td>
+                        <td>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn btn-sm btn-success" onclick="approveSite('${s.id}')">✓ Tasdiq</button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectSite('${s.id}')">✕ Rad</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // 2. Orders & Payouts Table
+            const ordersTbody = document.getElementById('admin-orders-tbody');
+            if (orders.length === 0) {
+                ordersTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px;">Buyurtmalar mavjud emas.</td></tr>`;
+            } else {
+                ordersTbody.innerHTML = orders.map(ord => {
+                    let payoutBtn = '';
+                    if (ord.is_paid_out) {
+                        payoutBtn = `<span class="badge badge-approved">✓ To'langan</span>`;
+                    } else if (ord.domain_status === 'COMPLETED' || ord.status === 'COMPLETED') {
+                        payoutBtn = `<button class="btn btn-sm btn-success" onclick="markOrderPaidOut('${ord.id}')">💸 To'landi</button>`;
+                    } else {
+                        payoutBtn = `<span style="font-size: 0.8rem; color: var(--text-muted);">Mijoz tasdig'i kutilmoqda</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td><strong>${ord.order_number}</strong></td>
+                            <td>${ord.customer_name || 'Mijoz'}</td>
+                            <td>${ord.developer_name || 'Dasturchi'}</td>
+                            <td style="font-weight: 700;">${siteHub.formatPrice(ord.total)}</td>
+                            <td style="color: var(--primary); font-weight: 600;">${siteHub.formatPrice(ord.commission_amount || 10000)}</td>
+                            <td style="color: var(--success); font-weight: 700;">${siteHub.formatPrice(ord.developer_amount || (ord.total - 10000))}</td>
+                            <td><span class="badge badge-approved">${ord.status}</span></td>
+                            <td>${payoutBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // 3. Users Table
+            const usersTbody = document.getElementById('admin-users-tbody');
+            usersTbody.innerHTML = demoUsers.map(u => `
+                <tr>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge" style="background: var(--bg-tertiary);">${u.role.toUpperCase()}</span></td>
+                    <td>${u.blocked ? '<span class="badge badge-rejected">Bloklangan</span>' : '<span class="badge badge-approved">Faol</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm ${u.blocked ? 'btn-success' : 'btn-danger'}" onclick="toggleUserBlock('${u.id}')">
+                            ${u.blocked ? 'Ochish' : 'Bloklash'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function approveSite(id) {
+            const site = siteHub.getSiteById(id);
+            if (site) {
+                site.status = 'APPROVED';
+                siteHub.saveSite(site);
+                siteHub.showToast(`"${site.title}" tasdiqlandi va Marketplace'ga joylashtirildi!`, "success");
+                renderAdminDashboard();
+            }
+        }
+
+        function rejectSite(id) {
+            const site = siteHub.getSiteById(id);
+            if (site) {
+                site.status = 'REJECTED';
+                siteHub.saveSite(site);
+                siteHub.showToast(`"${site.title}" rad etildi.`, "warning");
+                renderAdminDashboard();
+            }
+        }
+
+        function markOrderPaidOut(orderId) {
+            const order = siteHub.getOrders().find(o => o.id === orderId);
+            if (order) {
+                order.is_paid_out = true;
+                siteHub.saveOrder(order);
+                siteHub.showToast(`Dasturchiga to'lov muvaffaqiyatli amalga oshirildi deb belgilandi!`, "success");
+                renderAdminDashboard();
+            }
+        }
+
+        function toggleUserBlock(userId) {
+            const user = demoUsers.find(u => u.id === userId);
+            if (user) {
+                user.blocked = !user.blocked;
+                siteHub.showToast(`${user.name} holati o'zgartirildi (${user.blocked ? 'Bloklandi' : 'Faollashtirildi'}).`, "info");
+                renderAdminDashboard();
+            }
+        }
+
+        function updateCommissionPreview() {
+            const type = document.getElementById('comm-type-select').value;
+            const amount = Number(document.getElementById('comm-amount-input').value);
+            const lbl = document.getElementById('comm-amount-lbl');
+
+            const sampleTotal = 2000000;
+            let fee = 0;
+            if (type === 'percent') {
+                lbl.textContent = "Foiz miqdori (%)";
+                fee = Math.round((sampleTotal * amount) / 100);
+            } else {
+                lbl.textContent = "Summa (so'mda)";
+                fee = amount;
+            }
+
+            const devAmount = Math.max(0, sampleTotal - fee);
+            document.getElementById('preview-comm-fee').textContent = siteHub.formatPrice(fee);
+            document.getElementById('preview-dev-payout').textContent = siteHub.formatPrice(devAmount);
+        }
+
+        function handleSaveCommission(e) {
+            e.preventDefault();
+            const type = document.getElementById('comm-type-select').value;
+            const amount = Number(document.getElementById('comm-amount-input').value);
+
+            siteHub.updateSettings({
+                commission_type: type,
+                commission_amount: amount
+            });
+
+            siteHub.closeModal('modal-admin-commission');
+            siteHub.showToast("Xizmat haqi parametrlari yangilandi!", "success");
+            renderAdminDashboard();
+        }
+
+        function handleSavePlatformCard(e) {
+            e.preventDefault();
+            const num = document.getElementById('admin-card-number-input').value.trim();
+            const holder = document.getElementById('admin-card-holder-input').value.trim();
+            const bank = document.getElementById('admin-card-bank-input').value.trim();
+
+            siteHub.updateSettings({
+                platform_card: num,
+                platform_holder: holder,
+                platform_bank: bank
+            });
+
+            siteHub.closeModal('modal-admin-card');
+            siteHub.showToast("Platforma kartasi ma'lumotlari yangilandi!", "success");
+            renderAdminDashboard();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const settings = siteHub.getSettings();
+            document.getElementById('comm-type-select').value = settings.commission_type || 'fixed';
+            document.getElementById('comm-amount-input').value = settings.commission_amount || 10000;
+            document.getElementById('admin-card-number-input').value = settings.platform_card || '8600 4501 2289 7712';
+            document.getElementById('admin-card-holder-input').value = settings.platform_holder || 'SITEHUB MARKETPLACE MCHJ';
+            document.getElementById('admin-card-bank-input').value = settings.platform_bank || 'Kapitalbank ATB';
+
+            updateCommissionPreview();
+            renderAdminDashboard();
+        });
+    </script>
+</body>
+</html>

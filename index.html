@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiteHub — Tayyor Web-Saytlar Bozori | O'zbekiston</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="marketplace.html#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <!-- Language Selector -->
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <!-- Theme Switcher -->
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <!-- Favorites Heart -->
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <!-- User Session / Login Button -->
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">
+                        <span data-i18n="nav_login">Kirish</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-glow"></div>
+            <div class="container hero-content">
+                <div class="hero-tag">
+                    <span>✨</span>
+                    <span data-i18n="hero_tag">O'zbekistonda №1 Tayyor Web-Saytlar Bozori</span>
+                </div>
+
+                <h1 class="hero-title">
+                    <span data-i18n="hero_title_1">Kerakli saytingizni</span><br>
+                    <span data-i18n="hero_title_2">tayyor holda toping</span>
+                </h1>
+
+                <p class="hero-subtitle" data-i18n="hero_subtitle">
+                    Professional dasturchilardan sinovdan o'tgan, moslashuvchan va to'liq tayyor web-saytlarni 1 kunda sotib oling va biznesingizni boshlang.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="marketplace.html" class="btn btn-primary btn-lg" data-i18n="btn_explore">
+                        Saytlarni Ko'rish
+                    </a>
+                    <a href="login.html?role=developer" class="btn btn-secondary btn-lg" data-i18n="btn_sell">
+                        Sayt Sotish
+                    </a>
+                </div>
+
+                <!-- Big Search Bar -->
+                <div class="search-box-hero">
+                    <span style="font-size: 1.2rem; color: var(--text-muted); margin-right: 8px;">🔍</span>
+                    <input type="text" id="hero-search-input" class="search-input-hero" placeholder="Masalan: Restoran sayti, Internet do'kon, Portfolio..." data-i18n-placeholder="search_placeholder">
+                    <button class="btn btn-primary" onclick="performHeroSearch()">Qidirish</button>
+                </div>
+
+                <!-- 5 Quick Filter Tags -->
+                <div class="search-quick-tags">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Ommabop:</span>
+                    <a href="marketplace.html?category=restaurant" class="quick-tag">🍽️ Restoran</a>
+                    <a href="marketplace.html?category=shop" class="quick-tag">🛍️ Internet Do'kon</a>
+                    <a href="marketplace.html?category=portfolio" class="quick-tag">🎨 Portfolio</a>
+                    <a href="marketplace.html?category=landing" class="quick-tag">🚀 Landing</a>
+                    <a href="marketplace.html?category=crm" class="quick-tag">📊 CRM</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12 Categories Section -->
+        <section class="section" id="categories" style="background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 8px;" data-i18n="section_categories">Sayt Kategoriyalari</h2>
+                    <p style="color: var(--text-secondary);">O'z sohangizga mos keluvchi tayyor sayt turini tanlang</p>
+                </div>
+
+                <div class="categories-grid" id="home-categories-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Popular Sites Section (Top 8 Best Sellers) -->
+        <section class="section">
+            <div class="container">
+                <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div class="badge badge-new" style="margin-bottom: 8px;">TOP TANLOV</div>
+                        <h2 style="font-size: 2rem; font-weight: 800;" data-i18n="section_popular">Mashhur Web-Saytlar</h2>
+                        <p style="color: var(--text-secondary);">Eng ko'p sotilgan va yuqori baholangan tayyor shablonlar</p>
+                    </div>
+                    <a href="marketplace.html" class="btn btn-outline">
+                        Barchasini ko'rish →
+                    </a>
+                </div>
+
+                <div class="sites-grid" id="home-popular-sites">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Why SiteHub (4 Advantages: Fast, Affordable, Secure, Reliable) -->
+        <section class="section" style="background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; max-width: 650px; margin: 0 auto 30px;">
+                    <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;" data-i18n="section_why">Nima uchun SiteHub?</h2>
+                    <p style="color: var(--text-secondary);">Biznesingizni internetga olib chiqishning eng oson, xavfsiz va tejamkor yo'li</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon-box">⚡</div>
+                        <h3 class="feature-title">Tezkor Ishga Tushirish</h3>
+                        <p class="feature-desc">Oylarcha kutish shart emas. Tayyor saytni tanlang, 24 soat ichida domeningizga ulab, to'liq ishchi holatda qabul qiling.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">💰</div>
+                        <h3 class="feature-title">5-10 Barobar Arzon</h3>
+                        <p class="feature-desc">Noldan tayyorlatish 10-20 million so'm turadi. SiteHub'da esa tayyor professional saytlarni 800,000 so'mdan boshlab sotib olasiz.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🛡️</div>
+                        <h3 class="feature-title">Escrow Xavfsiz To'lov</h3>
+                        <p class="feature-desc">To'langan mablag' dasturchiga darhol o'tmaydi. Sayt domeningizda ishga tushib, siz tasdiqlamaguningizcha pul platformada xavfsiz saqlanadi.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon-box">✅</div>
+                        <h3 class="feature-title">Ishonchli va Tekshirilgan</h3>
+                        <p class="feature-desc">Barcha saytlar moderatorlarimiz tomonidan xavfsizlik, tezlik va mobil moslashuvchanlik bo'yicha to'liq tekshiruvdan o'tkaziladi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="section">
+            <div class="container">
+                <div class="cta-banner">
+                    <h2 class="cta-title">Saytingizni bugun boshlang</h2>
+                    <p class="cta-desc">Minglab tadbirkorlar va startaplar o'z saytlarini SiteHub orqali 1 kunda ishga tushirishmoqda.</p>
+                    <div class="cta-buttons">
+                        <a href="marketplace.html" class="btn btn-white btn-lg">Marketplace'ga O'tish</a>
+                        <a href="login.html?role=developer" class="btn btn-transparent btn-lg">Dasturchi bo'lib sotish</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-badge">S</div>
+                        <span class="logo-text">SiteHub</span>
+                    </a>
+                    <p>O'zbekistondagi tayyor web-saytlar birinchi professional marketplace platformasi.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Platforma</h4>
+                    <ul>
+                        <li><a href="marketplace.html">Marketplace</a></li>
+                        <li><a href="developers.html">Dasturchilar</a></li>
+                        <li><a href="marketplace.html#categories">Kategoriyalar</a></li>
+                        <li><a href="about.html">Biz haqimizda</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Yordam</h4>
+                    <ul>
+                        <li><a href="support.html">Qo'llab-quvvatlash</a></li>
+                        <li><a href="about.html#process">Qanday ishlaydi?</a></li>
+                        <li><a href="about.html#escrow">Xavfsiz to'lov</a></li>
+                        <li><a href="support.html#faq">Ko'p beriladigan savollar</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Bog'lanish</h4>
+                    <ul>
+                        <li><span style="color: var(--text-secondary);">📞 +998 90 123 45 67</span></li>
+                        <li><span style="color: var(--text-secondary);">✉️ support@sitehub.uz</span></li>
+                        <li><span style="color: var(--text-secondary);">📍 Toshkent sh., Chilonzor tumani</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub. <span data-i18n="footer_rights">Barcha huquqlar himoyalangan.</span></p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Foydalanish shartlari</a>
+                    <a href="about.html">Maxfiylik siyosati</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item active">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        function performHeroSearch() {
+            const query = document.getElementById('hero-search-input').value.trim();
+            if (query) {
+                window.location.href = `marketplace.html?q=${encodeURIComponent(query)}`;
+            } else {
+                window.location.href = `marketplace.html`;
+            }
+        }
+
+        // Enter key in search input
+        document.getElementById('hero-search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performHeroSearch();
+        });
+
+        // Render Categories
+        function renderCategories() {
+            const grid = document.getElementById('home-categories-grid');
+            if (!grid) return;
+
+            const allSites = siteHub.getSites({ status: 'APPROVED' });
+            grid.innerHTML = siteHubCategories.map(cat => {
+                const count = allSites.filter(s => s.category_slug === cat.slug).length;
+                const name = cat[siteHub.currentLang] || cat.uz;
+                return `
+                    <a href="marketplace.html?category=${cat.slug}" class="category-card">
+                        <div class="category-icon">${cat.icon}</div>
+                        <div class="category-name">${name}</div>
+                        <div class="category-count">${count} ta sayt</div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Render Popular Sites
+        function renderPopularSites() {
+            const container = document.getElementById('home-popular-sites');
+            if (!container) return;
+
+            const sites = siteHub.getSites({ status: 'APPROVED' }).slice(0, 8);
+            container.innerHTML = sites.map(site => {
+                const isFav = siteHub.isFavorite(site.id);
+                return `
+                    <div class="site-card">
+                        <div class="site-thumb-wrapper">
+                            ${site.is_new ? '<div class="site-badge-pos"><span class="badge badge-new">YANGI</span></div>' : ''}
+                            <button class="site-fav-btn ${isFav ? 'active' : ''}" onclick="siteHub.toggleFavorite('${site.id}'); renderPopularSites();" title="Sevimlilarga qo'shish">
+                                ${isFav ? '❤️' : '🤍'}
+                            </button>
+                            <img src="${site.screenshots[0]}" alt="${site.title}" class="site-thumb" loading="lazy">
+                        </div>
+                        <div class="site-body">
+                            <span class="site-category-tag">${site.category_slug.toUpperCase()}</span>
+                            <h3 class="site-title">${site.title}</h3>
+                            <div class="site-tech-tags">
+                                ${(site.tech || []).slice(0, 3).map(t => `<span class="tech-tag">${t}</span>`).join('')}
+                            </div>
+                            <div class="site-developer-row">
+                                <div class="dev-avatar-sm">${site.developer_avatar || 'D'}</div>
+                                <span class="dev-name-sm">${site.developer_name}</span>
+                            </div>
+                            <div class="site-meta-row">
+                                <div class="site-price">${siteHub.formatPrice(site.price)}</div>
+                                <div class="site-rating-box">
+                                    <span>⭐ ${site.rating}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.75rem;">(${site.sales_count} sotuv)</span>
+                                </div>
+                            </div>
+                            <div class="site-actions-row">
+                                <a href="product.html?id=${site.id}" class="btn btn-primary btn-sm">Batafsil</a>
+                                <a href="${site.demo_url || '#'}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Demo ↗</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderPopularSites();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qo'llab-quvvatlash — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="marketplace.html#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link active" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">Kirish</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container">
+            <!-- Header title -->
+            <div style="text-align: center; max-width: 650px; margin: 0 auto 40px;">
+                <div class="badge badge-verified" style="margin-bottom: 12px;">QO'LLAB-QUVVATLASH MARKAZI</div>
+                <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 12px;">Sizga qanday yordam bera olamiz?</h1>
+                <p style="color: var(--text-secondary); font-size: 1.05rem;">
+                    Sayt tanlash, to'lovlar, domen biriktirish yoki dasturchi sifatida hamkorlik qilish bo'yicha biz bilan bog'laning.
+                </p>
+            </div>
+
+            <!-- 4 Contact Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 48px;">
+                <div class="card" style="text-align: center; padding: 28px 20px;">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">✉️</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Elektron Pochta</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Rasmiy murojaatlar uchun</p>
+                    <a href="mailto:support@sitehub.uz" style="font-weight: 700; color: var(--primary);">support@sitehub.uz</a>
+                </div>
+
+                <div class="card" style="text-align: center; padding: 28px 20px;">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">📞</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Telefon Markazi</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Tezkor qo'ng'iroqlar</p>
+                    <a href="tel:+998901234567" style="font-weight: 700; color: var(--primary);">+998 90 123 45 67</a>
+                </div>
+
+                <div class="card" style="text-align: center; padding: 28px 20px;">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">✈️</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Telegram Bot / Admin</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">24/7 onlayn yozishmalar</p>
+                    <a href="https://t.me/sitehub_uz" target="_blank" rel="noopener" style="font-weight: 700; color: var(--primary);">@sitehub_uz</a>
+                </div>
+
+                <div class="card" style="text-align: center; padding: 28px 20px;">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">⏰</div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Ish Vaqti</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Dushanba — Shanba</p>
+                    <span style="font-weight: 700; color: var(--text-primary);">09:00 — 20:00</span>
+                </div>
+            </div>
+
+            <!-- Two Columns: Contact Form + FAQ Accordion -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: flex-start;">
+                
+                <!-- Support Contact Form -->
+                <div class="card">
+                    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 18px;">Xabar Yuborish</h2>
+                    <form onsubmit="handleSupportSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Ismingiz *</label>
+                            <input type="text" id="sup-name" class="form-input" placeholder="Otabek Umarov" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email manzilingiz *</label>
+                            <input type="email" id="sup-email" class="form-input" placeholder="misol@domain.uz" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Mavzu</label>
+                            <select id="sup-subject" class="form-select">
+                                <option value="general">Umumiy savol</option>
+                                <option value="order">Buyurtma va to'lov masalasi</option>
+                                <option value="domain">Domen sozlash bo'yicha yordam</option>
+                                <option value="developer">Dasturchi hamkorligi</option>
+                                <option value="complaint">Shikoyat yoki e'tiroz</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Xabaringiz *</label>
+                            <textarea id="sup-message" class="form-textarea" placeholder="Savol yoki muammoingizni batafsil yozing..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            Murojaatni Yuborish ✈️
+                        </button>
+                    </form>
+                </div>
+
+                <!-- FAQ Accordion -->
+                <div id="faq">
+                    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 18px;">Ko'p Beriladigan Savollar</h2>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="card" style="padding: 18px; cursor: pointer;" onclick="toggleFaq(this)">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                <span>🌐 Domen qanday va kim tomonidan ulanadi?</span>
+                                <span>▾</span>
+                            </div>
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; display: none;">
+                                Siz checkout sahifasida istagan (.uz, .com va h.k.) domen nomini kiritasiz. To'lovdan so'ng sayt dasturchisi domenni xarid qilib, saytni unga to'liq sozlab beradi. Siz saytni tekshirib tasdiqlaysiz.
+                            </p>
+                        </div>
+
+                        <div class="card" style="padding: 18px; cursor: pointer;" onclick="toggleFaq(this)">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                <span>🛡️ Escrow xavfsiz to'lov qanday ishlaydi?</span>
+                                <span>▾</span>
+                            </div>
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; display: none;">
+                                To'langan pul to'g'ridan-to'g'ri dasturchiga o'tmaydi. U platforma hisobida muzlatiladi. Dasturchi saytni domeningizga ulab, siz shaxsan "Tasdiqlash" tugmasini bosganingizdan keyingina pul dasturchiga yetkaziladi.
+                            </p>
+                        </div>
+
+                        <div class="card" style="padding: 18px; cursor: pointer;" onclick="toggleFaq(this)">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                <span>💻 Dasturchi sifatida sayt sotishni qanday boshlayman?</span>
+                                <span>▾</span>
+                            </div>
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; display: none;">
+                                Ro'yxatdan o'tishda "Dasturchi" rolini tanlang, boshqaruv panelida "Yangi sayt qo'shish" tugmasini bosing va Netlify live havolasi bilan saytingizni yuklang. Moderator tasdiqlagach, sayt katalogga chiqadi.
+                            </p>
+                        </div>
+
+                        <div class="card" style="padding: 18px; cursor: pointer;" onclick="toggleFaq(this)">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                                <span>💳 To'lovni qaytarib olish mumkinmi?</span>
+                                <span>▾</span>
+                            </div>
+                            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; display: none;">
+                                Agar dasturchi 48 soat ichida saytni belgilangan talablarga muvofiq sozlab bermasa yoki buyurtma bekor qilinsa, Escrow hisobidagi mablag'ingiz to'liq qaytariladi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub Marketplace. Barcha huquqlar himoyalangan.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Foydalanish shartlari</a>
+                    <a href="about.html">Maxfiylik siyosati</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        function toggleFaq(card) {
+            const p = card.querySelector('p');
+            const arrow = card.querySelector('span:last-child');
+            if (p.style.display === 'none' || !p.style.display) {
+                p.style.display = 'block';
+                arrow.textContent = '▴';
+            } else {
+                p.style.display = 'none';
+                arrow.textContent = '▾';
+            }
+        }
+
+        function handleSupportSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('sup-name').value;
+            siteHub.showToast(`Rahmat, ${name}! Murojaatingiz qabul qilindi, operatorlarimiz tez orada bog'lanishadi.`, 'success');
+            document.getElementById('sup-name').value = '';
+            document.getElementById('sup-email').value = '';
+            document.getElementById('sup-message').value = '';
+        }
+    </script>
+</body>
+</html>

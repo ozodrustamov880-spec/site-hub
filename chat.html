@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat va Hamjamiyat — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">Kirish</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 2-Column Chat Container -->
+        <div class="chat-container-layout">
+            
+            <!-- Left Sidebar -->
+            <aside class="chat-sidebar" id="chat-sidebar-el">
+                <div class="chat-sidebar-header">
+                    <input type="text" id="chat-search-input" class="form-input" placeholder="Suhbatlarni qidirish..." oninput="filterChatList()">
+                    <div class="chat-tabs">
+                        <button class="chat-tab-btn active" id="tab-chat-direct" onclick="switchChatType('direct')">👤 Shaxsiy</button>
+                        <button class="chat-tab-btn" id="tab-chat-groups" onclick="switchChatType('groups')">👥 Guruhlar</button>
+                    </div>
+                </div>
+
+                <div class="chat-list" id="chat-list-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </aside>
+
+            <!-- Right Main Chat Area -->
+            <section class="chat-main-area" id="chat-main-el">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn btn-sm btn-secondary" onclick="toggleMobileSidebar()" style="display: none;" id="btn-back-to-chats">
+                            ← Ortga
+                        </button>
+                        <div class="chat-item-avatar" id="active-chat-avatar">S</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.05rem;" id="active-chat-name">Suhbat tanlang</div>
+                            <div style="font-size: 0.75rem; color: var(--success);" id="active-chat-status">● Onlayn</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm btn-secondary" onclick="siteHub.openModal('modal-report')" title="Shikoyat qilish">
+                            🚩 Shikoyat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Window -->
+                <div class="chat-messages" id="chat-messages-container">
+                    <div style="text-align: center; color: var(--text-muted); margin: auto;">
+                        💬 Xabarlarni ko'rish uchun chap tomondan suhbatni tanlang.
+                    </div>
+                </div>
+
+                <!-- Chat Input Bar -->
+                <form class="chat-input-bar" onsubmit="handleSendMessage(event)">
+                    <textarea id="chat-msg-input" class="chat-textarea" placeholder="Xabaringizni yozing..." rows="1" onkeydown="handleTextareaKeydown(event)"></textarea>
+                    <button type="submit" class="btn btn-primary" style="border-radius: var(--radius-pill); padding: 10px 18px;">
+                        Yuborish ✈️
+                    </button>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <!-- Report Modal -->
+    <div class="modal-backdrop" id="modal-report">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Shikoyat yuborish</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-report')">✕</button>
+            </div>
+            <form onsubmit="handleSendReport(event)">
+                <div class="modal-body">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 14px;">
+                        Agar ushbu suhbatda qoidabuzarlik yoki firibgarlik holati bo'lsa, ma'muriyatga xabar bering.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label">Sababni tanlang</label>
+                        <select id="report-reason" class="form-select" required>
+                            <option value="spam">Spam yoki reklama</option>
+                            <option value="fraud">Firibgarlik yoki soxta ma'lumot</option>
+                            <option value="insult">Haqoratli so'zlar</option>
+                            <option value="other">Boshqa qoidabuzarlik</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Batafsil izoh</label>
+                        <textarea id="report-details" class="form-textarea" placeholder="Vaziyatni qisqacha yozing..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-report')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Shikoyatni yuborish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item active">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        let currentChatMode = 'direct'; // 'direct' or 'groups'
+        let activeChatId = null;
+
+        // Dummy Data for Chats
+        const DIRECT_CHATS = [
+            {
+                id: 'direct-dev-001',
+                name: 'Azizbek Rahimov (Dasturchi)',
+                role: 'developer',
+                avatar: 'A',
+                lastMsg: 'Assalomu alaykum! Saytni domeningizga 2 soatda ulab beraman.',
+                time: '14:20',
+                messages: [
+                    { sender: 'them', text: 'Assalomu alaykum! Solis sayti bo\'yicha savollaringiz bormi?', time: '14:15' },
+                    { sender: 'me', text: 'Salom, saytni .uz domenga ulab bera olasizmi?', time: '14:18' },
+                    { sender: 'them', text: 'Albatta! Buyurtma rasmiylashtirilsa, 2 soatda to\'liq ulab sozlab beraman.', time: '14:20' }
+                ]
+            },
+            {
+                id: 'direct-dev-002',
+                name: 'Malika Sobirova (Dasturchi)',
+                role: 'developer',
+                avatar: 'M',
+                lastMsg: 'Internet-do\'konga Click va Payme to\'liq ulangan.',
+                time: 'Kecha',
+                messages: [
+                    { sender: 'them', text: 'Salom! Aura do\'koni bo\'yicha murojaat qilgandingiz.', time: '11:00' },
+                    { sender: 'them', text: 'Internet-do\'konga Click va Payme to\'liq ulangan.', time: '11:05' }
+                ]
+            }
+        ];
+
+        const GROUPS_DATA = [
+            {
+                id: 'grp-general',
+                category: 'general',
+                name: '🌍 Umumiy Hamjamiyat',
+                desc: 'Barcha a\'zolar uchun ochiq muhokama',
+                messages: [
+                    { senderName: 'Jasur', text: 'Hamma dasturchilarga salom! Yangi saytlar yukladim.', time: '10:00' },
+                    { senderName: 'Otabek', text: 'Assalomu alaykum, yangi internet do\'kon shablonlari juda yaxshi ekan.', time: '11:30' }
+                ]
+            },
+            {
+                id: 'grp-devs',
+                category: 'developers',
+                name: '💻 Dasturchilar Markazi',
+                desc: 'Faqatgina sayt yuklagan dasturchilar uchun yopiq chat',
+                messages: [
+                    { senderName: 'Azizbek Rahimov', text: 'Haftalik to\'lovlar admin tomonidan to\'liq o\'tkazib berildi.', time: '09:15' },
+                    { senderName: 'Malika Sobirova', text: 'Ajoyib, yangi landing saytim ham moderatsiyadan o\'tdi!', time: '12:00' }
+                ]
+            },
+            {
+                id: 'grp-customers',
+                category: 'customers',
+                name: '🛒 Mijozlar Klubi',
+                desc: 'Mijozlar uchun domen va biznes maslahatlari',
+                messages: [
+                    { senderName: 'Otabek Umarov', text: 'Domen tasdiqlangach sayt qancha vaqtda ishga tushadi?', time: '13:00' },
+                    { senderName: 'Admin', text: 'DNS yangilanishi odatda 15-30 daqiqa vaqt oladi.', time: '13:05' }
+                ]
+            }
+        ];
+
+        function switchChatType(mode) {
+            currentChatMode = mode;
+            document.getElementById('tab-chat-direct').classList.toggle('active', mode === 'direct');
+            document.getElementById('tab-chat-groups').classList.toggle('active', mode === 'groups');
+            renderChatList();
+        }
+
+        function canAccessGroup(group) {
+            const user = siteHub.currentUser;
+            if (!user) return group.category === 'general';
+            if (user.role === 'admin') return true;
+
+            if (group.category === 'general') return true;
+            if (group.category === 'developers') {
+                // Must be developer and have uploaded site
+                return user.role === 'developer';
+            }
+            if (group.category === 'customers') {
+                return user.role === 'customer';
+            }
+            return false;
+        }
+
+        function renderChatList() {
+            const container = document.getElementById('chat-list-container');
+            const searchQ = document.getElementById('chat-search-input').value.toLowerCase();
+
+            if (currentChatMode === 'direct') {
+                const list = DIRECT_CHATS.filter(c => c.name.toLowerCase().includes(searchQ));
+                container.innerHTML = list.map(c => `
+                    <div class="chat-item ${activeChatId === c.id ? 'active' : ''}" onclick="selectChat('${c.id}', 'direct')">
+                        <div class="chat-item-avatar">${c.avatar}</div>
+                        <div class="chat-item-content">
+                            <div class="chat-item-name">${c.name}</div>
+                            <div class="chat-item-msg">${c.lastMsg}</div>
+                        </div>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">${c.time}</span>
+                    </div>
+                `).join('');
+            } else {
+                // Filter groups by user permissions
+                const accessibleGroups = GROUPS_DATA.filter(g => canAccessGroup(g));
+                container.innerHTML = accessibleGroups.map(g => `
+                    <div class="chat-item ${activeChatId === g.id ? 'active' : ''}" onclick="selectChat('${g.id}', 'group')">
+                        <div class="chat-item-avatar" style="background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                            ${g.category === 'developers' ? '💻' : (g.category === 'customers' ? '🛒' : '🌍')}
+                        </div>
+                        <div class="chat-item-content">
+                            <div class="chat-item-name">${g.name}</div>
+                            <div class="chat-item-msg">${g.desc}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function selectChat(id, type) {
+            activeChatId = id;
+            renderChatList();
+
+            const headerAvatar = document.getElementById('active-chat-avatar');
+            const headerName = document.getElementById('active-chat-name');
+            const headerStatus = document.getElementById('active-chat-status');
+            const messagesContainer = document.getElementById('chat-messages-container');
+
+            if (type === 'direct') {
+                const chat = DIRECT_CHATS.find(c => c.id === id);
+                if (!chat) return;
+                headerAvatar.textContent = chat.avatar;
+                headerName.textContent = chat.name;
+                headerStatus.textContent = '● Onlayn (Dasturchi)';
+
+                messagesContainer.innerHTML = chat.messages.map(m => `
+                    <div class="message-bubble ${m.sender === 'me' ? 'msg-outgoing' : 'msg-incoming'}">
+                        <div>${m.text}</div>
+                        <div class="msg-time">${m.time}</div>
+                    </div>
+                `).join('');
+            } else {
+                const grp = GROUPS_DATA.find(g => g.id === id);
+                if (!grp) return;
+                headerAvatar.textContent = grp.category === 'developers' ? '💻' : (grp.category === 'customers' ? '🛒' : '🌍');
+                headerName.textContent = grp.name;
+                headerStatus.textContent = `Guruh a'zolari • Hamjamiyat`;
+
+                messagesContainer.innerHTML = grp.messages.map(m => `
+                    <div class="message-bubble msg-incoming">
+                        <div style="font-weight: 700; font-size: 0.78rem; color: var(--primary); margin-bottom: 2px;">${m.senderName}</div>
+                        <div>${m.text}</div>
+                        <div class="msg-time">${m.time}</div>
+                    </div>
+                `).join('');
+            }
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-msg-input');
+            const text = input.value.trim();
+            if (!text || !activeChatId) return;
+
+            const nowTime = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+
+            if (currentChatMode === 'direct') {
+                const chat = DIRECT_CHATS.find(c => c.id === activeChatId);
+                if (chat) {
+                    chat.messages.push({ sender: 'me', text: text, time: nowTime });
+                    chat.lastMsg = text;
+                    chat.time = nowTime;
+                }
+            } else {
+                const grp = GROUPS_DATA.find(g => g.id === activeChatId);
+                if (grp) {
+                    const userName = siteHub.currentUser ? siteHub.currentUser.name : 'Mijoz';
+                    grp.messages.push({ senderName: userName, text: text, time: nowTime });
+                }
+            }
+
+            input.value = '';
+            selectChat(activeChatId, currentChatMode);
+
+            // Auto-reply simulation for direct chats after 2 seconds
+            if (currentChatMode === 'direct') {
+                setTimeout(() => {
+                    const chat = DIRECT_CHATS.find(c => c.id === activeChatId);
+                    if (chat) {
+                        chat.messages.push({
+                            sender: 'them',
+                            text: 'Rahmat! Xabaringizni oldim, darhol ko\'rib chiqyapman.',
+                            time: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+                        });
+                        siteHub.playNotificationSound();
+                        selectChat(activeChatId, 'direct');
+                    }
+                }, 2000);
+            }
+        }
+
+        function handleTextareaKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+            }
+        }
+
+        function filterChatList() {
+            renderChatList();
+        }
+
+        function handleSendReport(e) {
+            e.preventDefault();
+            siteHub.closeModal('modal-report');
+            siteHub.showToast("Shikoyatingiz ma'muriyatga yuborildi va tez orada ko'rib chiqiladi.", "success");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChatList();
+            // Automatically open first direct chat
+            if (DIRECT_CHATS.length > 0) {
+                selectChat(DIRECT_CHATS[0].id, 'direct');
+            }
+        });
+    </script>
+</body>
+</html>

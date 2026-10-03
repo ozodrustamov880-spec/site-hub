@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyurtma Rasmiylashtirish — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <div style="font-weight: 700; color: var(--text-secondary); font-size: 0.95rem;">
+                🔒 Xavfsiz Escrow Buyurtma
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <a href="marketplace.html" class="btn btn-secondary btn-sm">Bekor qilish</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container">
+            <div class="checkout-layout">
+                
+                <!-- Left: Order Form -->
+                <div>
+                    <!-- Site Basic Card -->
+                    <div class="card" style="margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
+                        <img id="chk-site-img" src="" alt="Site" style="width: 90px; height: 60px; object-fit: cover; border-radius: var(--radius-sm);">
+                        <div>
+                            <span id="chk-site-category" class="site-category-tag">KATEGORIYA</span>
+                            <h3 id="chk-site-title" style="font-size: 1.1rem; font-weight: 700;">Yuklanmoqda...</h3>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                Dasturchi: <span id="chk-dev-name" style="font-weight: 600; color: var(--text-secondary);">...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Details Form -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">1. Aloqa ma'lumotlari</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div class="form-group">
+                                <label class="form-label">To'liq ismingiz</label>
+                                <input type="text" id="chk-cust-name" class="form-input" placeholder="Otabek Umarov" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Telefon raqam</label>
+                                <input type="tel" id="chk-cust-phone" class="form-input" placeholder="+998 90 123 45 67" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email manzili</label>
+                            <input type="email" id="chk-cust-email" class="form-input" placeholder="otabek@gmail.com" required>
+                            <span class="form-hint">Sayt fayllari va buyurtma cheki shu emailga yuboriladi</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Buyurtmaga qo'shimcha izoh (ixtiyoriy)</label>
+                            <textarea id="chk-order-note" class="form-textarea" placeholder="Saytni sozlash yoki korporativ ranglar bo'yicha talablaringizni yozing..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- DOMEN MAJBURIY BLOKI (Yellow Highlighted Box) -->
+                    <div class="domain-mandatory-block">
+                        <div class="domain-mandatory-title">
+                            <span>🌐</span>
+                            <span>DOMEN SOZLASH — MAJBURIY BOSQICH</span>
+                        </div>
+                        <p style="font-size: 0.9rem; line-height: 1.5; margin-bottom: 14px; opacity: 0.95;">
+                            SiteHub qoidalariga ko'ra, har bir xarid qilingan sayt to'g'ridan-to'g'ri mijozning shaxsiy domeniga ulab beriladi. Iltimos, o'zingiz istagan domen nomini kiriting.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label" style="font-weight: 700;">Domen nomi (.uz, .com, .net, .ru, .org)</label>
+                            <input type="text" id="domain-input" class="form-input" placeholder="masalan: myshop.uz" oninput="validateDomain()" style="font-weight: 700; font-size: 1rem;">
+                            <div id="domain-validation-msg" style="font-size: 0.8rem; margin-top: 4px; font-weight: 600;"></div>
+                        </div>
+
+                        <!-- Checkbox (Mandatory) -->
+                        <label class="checkbox-label" style="font-weight: 600; margin-top: 10px;">
+                            <input type="checkbox" id="domain-agree-checkbox" onchange="validateDomain()">
+                            <span>Men domen sotib olishga va uni saytga biriktirishga to'liq roziman</span>
+                        </label>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="card">
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">2. To'lov usuli</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                            <label class="role-card selected" id="pm-payme" onclick="selectPaymentMethod('payme')">
+                                <div style="font-size: 1.5rem; margin-bottom: 4px;">🟢</div>
+                                <div style="font-weight: 700; font-size: 0.95rem;">Payme</div>
+                            </label>
+                            <label class="role-card" id="pm-click" onclick="selectPaymentMethod('click')">
+                                <div style="font-size: 1.5rem; margin-bottom: 4px;">🔵</div>
+                                <div style="font-weight: 700; font-size: 0.95rem;">Click</div>
+                            </label>
+                            <label class="role-card" id="pm-card" onclick="selectPaymentMethod('card')">
+                                <div style="font-size: 1.5rem; margin-bottom: 4px;">💳</div>
+                                <div style="font-weight: 700; font-size: 0.95rem;">Bank kartasi</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Sticky Order Summary -->
+                <aside>
+                    <div class="order-summary-box">
+                        <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 20px;">Buyurtma hisobi</h3>
+
+                        <div class="summary-row">
+                            <span style="color: var(--text-secondary);">Sayt asosiy narxi:</span>
+                            <span id="sum-base-price" style="font-weight: 700;">0 so'm</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span style="color: var(--text-secondary);">Qo'shimcha xizmatlar:</span>
+                            <span id="sum-extras-price" style="font-weight: 700;">0 so'm</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span style="color: var(--text-secondary);">.UZ Domen (1 yillik):</span>
+                            <span id="sum-domain-price" style="font-weight: 700;">120,000 so'm</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span style="color: var(--text-secondary);">Platforma xizmat haqi:</span>
+                            <span id="sum-service-fee" style="font-weight: 700; color: var(--success);">10,000 so'm</span>
+                        </div>
+
+                        <div class="summary-row summary-total">
+                            <span>JAMI TO'LOV:</span>
+                            <span id="sum-total-price">0 so'm</span>
+                        </div>
+
+                        <!-- Notice about Escrow -->
+                        <div style="background: var(--bg-tertiary); padding: 12px; border-radius: var(--radius-md); font-size: 0.8rem; color: var(--text-secondary); margin: 16px 0; line-height: 1.5;">
+                            🛡️ <strong>Escrow Kafolati:</strong> Siz to'lagan pul domen sozlanib, siz saytni tekshirib tasdiqlamaguningizcha platformada xavfsiz muzlatiladi.
+                        </div>
+
+                        <!-- Submit Button (Disabled until domain checked & valid) -->
+                        <button type="button" id="btn-proceed-pay" class="btn btn-primary btn-block btn-lg" onclick="openPaymentModal()" disabled>
+                            💳 To'lovga o'tish
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Modal (Money distribution, Card copy, Receipt input) -->
+    <div class="modal-backdrop" id="modal-payment">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Xavfsiz To'lov Oynasi</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-payment')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Buyurtma raqami:</span>
+                    <div id="modal-order-number" style="font-weight: 800; font-size: 1.2rem; color: var(--primary);">SH-0000</div>
+                    <div id="modal-order-total" style="font-size: 1.8rem; font-weight: 800; margin-top: 4px;">0 so'm</div>
+                </div>
+
+                <!-- Money Split Card (Ko'rgazmali Pul Taqsimoti) -->
+                <div class="payout-split-card">
+                    <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+                        PUL TAQSIMOTI (Shaffof Escrow tizimi):
+                    </div>
+                    <div class="split-row">
+                        <span>Platforma xizmat haqi:</span>
+                        <strong id="split-platform-fee" style="color: var(--primary);">10,000 so'm</strong>
+                    </div>
+                    <div class="split-row">
+                        <span>Dasturchiga (ish yakunlangach):</span>
+                        <strong id="split-developer-payout" style="color: var(--success);">0 so'm</strong>
+                    </div>
+                </div>
+
+                <!-- Platform Card Info -->
+                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Rasmiy platforma hisob kartasi:</span>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="copyCardNumber()">📋 Nusxalash</button>
+                    </div>
+                    <div id="platform-card-number" style="font-size: 1.25rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">
+                        8600 4501 2289 7712
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                        <span id="platform-card-holder">SITEHUB MARKETPLACE MCHJ</span>
+                        <span id="platform-bank-name">Kapitalbank ATB</span>
+                    </div>
+                </div>
+
+                <!-- Receipt last 4 digits -->
+                <div class="form-group">
+                    <label class="form-label">To'lov chekining oxirgi 4 ta raqami:</label>
+                    <input type="text" id="receipt-last4-input" class="form-input" placeholder="masalan: 7812" maxlength="4" style="font-size: 1.1rem; text-align: center; letter-spacing: 2px;">
+                    <span class="form-hint">O'tkazma chekining tranzaksiya yoki karta raqami oxirgi 4 xonasi</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-payment')">Bekor qilish</button>
+                <button type="button" class="btn btn-primary" onclick="confirmPaymentAndCompleteOrder()">
+                    ✓ To'lovni tasdiqlash
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentSite = null;
+        let selectedExtrasTotal = 0;
+        let domainPrice = 120000;
+        let serviceFee = 10000;
+        let calculatedTotal = 0;
+        let selectedPaymentMethod = 'payme';
+        let currentOrderNumber = 'SH-' + Math.floor(1000 + Math.random() * 9000);
+
+        const DOMAIN_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.(uz|com|net|ru|org)$/i;
+
+        function selectPaymentMethod(pm) {
+            selectedPaymentMethod = pm;
+            ['payme', 'click', 'card'].forEach(p => {
+                document.getElementById(`pm-${p}`).classList.toggle('selected', p === pm);
+            });
+        }
+
+        function validateDomain() {
+            const domainVal = document.getElementById('domain-input').value.trim();
+            const agreed = document.getElementById('domain-agree-checkbox').checked;
+            const msgEl = document.getElementById('domain-validation-msg');
+            const btnPay = document.getElementById('btn-proceed-pay');
+
+            let isValidDomain = DOMAIN_REGEX.test(domainVal);
+
+            if (!domainVal) {
+                msgEl.textContent = "Domen nomini kiritish majburiy!";
+                msgEl.style.color = "var(--danger)";
+            } else if (!isValidDomain) {
+                msgEl.textContent = "Noto'g'ri domen formati! Faqat .uz, .com, .net, .ru, .org qabul qilinadi.";
+                msgEl.style.color = "var(--danger)";
+            } else {
+                msgEl.textContent = "✓ Domen formati to'g'ri!";
+                msgEl.style.color = "var(--success)";
+            }
+
+            if (isValidDomain && agreed) {
+                btnPay.removeAttribute('disabled');
+            } else {
+                btnPay.setAttribute('disabled', 'true');
+            }
+        }
+
+        function calculateCheckoutTotals() {
+            if (!currentSite) return;
+            const settings = siteHub.getSettings();
+            serviceFee = settings.commission_amount || 10000;
+
+            calculatedTotal = currentSite.price + selectedExtrasTotal + domainPrice;
+
+            document.getElementById('sum-base-price').textContent = siteHub.formatPrice(currentSite.price);
+            document.getElementById('sum-extras-price').textContent = siteHub.formatPrice(selectedExtrasTotal);
+            document.getElementById('sum-domain-price').textContent = siteHub.formatPrice(domainPrice);
+            document.getElementById('sum-service-fee').textContent = siteHub.formatPrice(serviceFee);
+            document.getElementById('sum-total-price').textContent = siteHub.formatPrice(calculatedTotal);
+        }
+
+        function openPaymentModal() {
+            const custName = document.getElementById('chk-cust-name').value.trim();
+            const custPhone = document.getElementById('chk-cust-phone').value.trim();
+            const custEmail = document.getElementById('chk-cust-email').value.trim();
+
+            if (!custName || !custPhone || !custEmail) {
+                siteHub.showToast("Iltimos, barcha aloqa maydonlarini to'ldiring!", "error");
+                return;
+            }
+
+            const settings = siteHub.getSettings();
+            const devPayout = Math.max(0, calculatedTotal - serviceFee);
+
+            document.getElementById('modal-order-number').textContent = currentOrderNumber;
+            document.getElementById('modal-order-total').textContent = siteHub.formatPrice(calculatedTotal);
+            document.getElementById('split-platform-fee').textContent = siteHub.formatPrice(serviceFee);
+            document.getElementById('split-developer-payout').textContent = siteHub.formatPrice(devPayout);
+
+            // Card settings
+            document.getElementById('platform-card-number').textContent = settings.platform_card || "8600 4501 2289 7712";
+            document.getElementById('platform-card-holder').textContent = settings.platform_holder || "SITEHUB MARKETPLACE MCHJ";
+            document.getElementById('platform-bank-name').textContent = settings.platform_bank || "Kapitalbank ATB";
+
+            siteHub.openModal('modal-payment');
+        }
+
+        function copyCardNumber() {
+            const cardNum = document.getElementById('platform-card-number').textContent.trim();
+            navigator.clipboard.writeText(cardNum.replace(/\s+/g, '')).then(() => {
+                siteHub.showToast("Karta raqami nusxalandi!", "success");
+            });
+        }
+
+        function confirmPaymentAndCompleteOrder() {
+            const last4 = document.getElementById('receipt-last4-input').value.trim();
+            if (last4.length < 4) {
+                siteHub.showToast("Iltimos, to'lov chekining oxirgi 4 xonasini kiriting!", "error");
+                return;
+            }
+
+            const domainVal = document.getElementById('domain-input').value.trim();
+            const custName = document.getElementById('chk-cust-name').value.trim();
+            const custEmail = document.getElementById('chk-cust-email').value.trim();
+            const custPhone = document.getElementById('chk-cust-phone').value.trim();
+            const note = document.getElementById('chk-order-note').value.trim();
+
+            const devPayout = Math.max(0, calculatedTotal - serviceFee);
+
+            const newOrder = {
+                id: 'ord-' + Date.now(),
+                order_number: currentOrderNumber,
+                customer_id: siteHub.currentUser ? siteHub.currentUser.id : 'user-cust-1',
+                customer_name: custName,
+                customer_email: custEmail,
+                customer_phone: custPhone,
+                site_id: currentSite.id,
+                site_title: currentSite.title,
+                developer_id: currentSite.developer_id,
+                developer_name: currentSite.developer_name,
+                base_price: currentSite.price,
+                extras_price: selectedExtrasTotal,
+                domain_price: domainPrice,
+                total: calculatedTotal,
+                commission_amount: serviceFee,
+                developer_amount: devPayout,
+                status: "PAID",
+                payment_method: selectedPaymentMethod,
+                payment_status: "PAID",
+                domain_name: domainVal,
+                domain_agreed: true,
+                domain_status: "AGREED", // Goes to developer to configure
+                receipt_last4: last4,
+                note: note,
+                is_paid_out: false,
+                created_at: new Date().toISOString()
+            };
+
+            siteHub.saveOrder(newOrder);
+            siteHub.closeModal('modal-payment');
+            siteHub.playNotificationSound();
+            siteHub.showToast("To'lov qabul qilindi! Buyurtma rasmiylashtirildi.", "success");
+
+            setTimeout(() => {
+                window.location.href = 'customer.html';
+            }, 1200);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const siteId = urlParams.get('siteId') || 'site-001';
+            const extrasParam = urlParams.get('extras') || '';
+
+            currentSite = siteHub.getSiteById(siteId);
+            if (!currentSite) currentSite = siteHub.getSites()[0];
+
+            if (currentSite) {
+                document.getElementById('chk-site-title').textContent = currentSite.title;
+                document.getElementById('chk-site-img').src = currentSite.screenshots[0];
+                document.getElementById('chk-site-category').textContent = currentSite.category_slug.toUpperCase();
+                document.getElementById('chk-dev-name').textContent = currentSite.developer_name;
+
+                // Calculate extras sum if passed in URL
+                if (extrasParam) {
+                    const ids = extrasParam.split(',');
+                    // Extras prices
+                    const extrasMap = {
+                        "ext-1": 150000, "ext-2": 100000, "ext-3": 200000, "ext-4": 300000,
+                        "ext-5": 120000, "ext-6": 250000, "ext-7": 350000, "ext-8": 400000,
+                        "ext-9": 250000, "ext-10": 180000
+                    };
+                    ids.forEach(id => {
+                        if (extrasMap[id]) selectedExtrasTotal += extrasMap[id];
+                    });
+                }
+
+                // Prefill user details if logged in
+                if (siteHub.currentUser) {
+                    document.getElementById('chk-cust-name').value = siteHub.currentUser.name || '';
+                    document.getElementById('chk-cust-email').value = siteHub.currentUser.email || '';
+                    document.getElementById('chk-cust-phone').value = siteHub.currentUser.phone || '';
+                }
+
+                calculateCheckoutTotals();
+            }
+        });
+    </script>
+</body>
+</html>

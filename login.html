@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirish va Ro'yxatdan O'tish — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Minimal Header for Auth -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <a href="index.html" class="btn btn-secondary btn-sm">← Bosh sahifaga</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="auth-wrapper">
+        <!-- Left Side: Gradient Background + Platform Stats -->
+        <div class="auth-sidebar">
+            <div>
+                <a href="index.html" class="logo" style="color: #fff; margin-bottom: 24px;">
+                    <div class="logo-badge" style="background: rgba(255,255,255,0.2);">S</div>
+                    <span style="color: #fff; font-weight: 800; font-size: 1.6rem;">SiteHub</span>
+                </a>
+                <h2 style="font-size: 2.2rem; font-weight: 800; line-height: 1.25; margin-bottom: 16px;">
+                    O'zbekistondagi eng yirik tayyor saytlar ekotizimi
+                </h2>
+                <p style="opacity: 0.9; font-size: 1.05rem; line-height: 1.6;">
+                    Saytlarni qulay sotib oling yoki o'z ishlaringizni joylab, daromad olishni boshlang.
+                </p>
+            </div>
+
+            <!-- 3 Stats Cards (500+, 2.4k, 4.9) -->
+            <div class="auth-stats-grid">
+                <div class="auth-stat-box">
+                    <div class="auth-stat-val">500+</div>
+                    <div class="auth-stat-lbl">Tayyor Web-Saytlar</div>
+                </div>
+                <div class="auth-stat-box">
+                    <div class="auth-stat-val">2.4k</div>
+                    <div class="auth-stat-lbl">Mamnun Mijozlar</div>
+                </div>
+                <div class="auth-stat-box">
+                    <div class="auth-stat-val">4.9 ★</div>
+                    <div class="auth-stat-lbl">O'rtacha Reyting</div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.85rem; opacity: 0.8;">
+                🛡️ 100% Escrow xavfsiz to'lov va kafolatlangan domen ulanishi
+            </div>
+        </div>
+
+        <!-- Right Side: Login / Register Form Tabs -->
+        <div class="auth-main">
+            <div class="auth-box">
+                <div class="auth-tabs">
+                    <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Kirish</div>
+                    <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Ro'yxatdan o'tish</div>
+                </div>
+
+                <!-- Error Box -->
+                <div id="auth-error-box" style="display: none; background: var(--danger-light); color: var(--danger); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 16px; font-weight: 600; font-size: 0.9rem;">
+                    Email yoki parol xato!
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button type="button" class="btn btn-secondary btn-block" onclick="mockSocialAuth('Google')">
+                            <span>🌐 Google</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-block" onclick="mockSocialAuth('Telegram')">
+                            <span>✈️ Telegram</span>
+                        </button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">yoki email orqali</span>
+                        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email manzili</label>
+                        <input type="email" id="login-email" class="form-input" placeholder="misol@domain.uz" required>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label class="form-label" style="margin-bottom: 0;">Parol</label>
+                            <a href="javascript:void(0)" onclick="siteHub.openModal('modal-forgot')" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Parolni unutdingizmi?</a>
+                        </div>
+                        <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                        Tizimga kirish →
+                    </button>
+
+                    <!-- Quick Testing Accounts -->
+                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 10px;">Tezkor sinov hisoblari:</span>
+                        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('customer')">🛒 Demo Mijoz</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('developer')">💻 Demo Dasturchi</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin')">👑 Demo Admin</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="register-form" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+                    <!-- Role Selection Cards -->
+                    <div class="form-group">
+                        <label class="form-label">Hisob turini tanlang:</label>
+                        <div class="role-cards-grid">
+                            <div class="role-card selected" id="role-card-customer" onclick="selectRole('customer')">
+                                <div class="role-icon">🛒</div>
+                                <div class="role-title">Mijoz</div>
+                                <div class="role-desc">Tayyor sayt sotib olish va buyurtma berish uchun</div>
+                            </div>
+                            <div class="role-card" id="role-card-developer" onclick="selectRole('developer')">
+                                <div class="role-icon">💻</div>
+                                <div class="role-title">Dasturchi</div>
+                                <div class="role-desc">Tayyor sayt sotish va buyurtmalar olish uchun</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">To'liq ismingiz</label>
+                        <input type="text" id="reg-name" class="form-input" placeholder="Otabek Umarov" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email manzili</label>
+                        <input type="email" id="reg-email" class="form-input" placeholder="otabek@gmail.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Telefon raqam</label>
+                        <input type="tel" id="reg-phone" class="form-input" placeholder="+998 90 123 45 67" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Yangi parol (kamida 6 belgi)</label>
+                        <input type="password" id="reg-password" class="form-input" placeholder="••••••••" minlength="6" required>
+                        <span class="form-hint">Harflar va raqamlar kombinatsiyasidan foydalaning</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                        Ro'yxatdan o'tish →
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-backdrop" id="modal-forgot">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Parolni tiklash</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-forgot')">✕</button>
+            </div>
+            <form onsubmit="handleForgotSubmit(event)">
+                <div class="modal-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.95rem;">
+                        Ro'yxatdan o'tgan email manzilingizni kiriting. Biz sizga yangi parol o'rnatish havolasini yuboramiz.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label">Email manzili</label>
+                        <input type="email" id="forgot-email" class="form-input" placeholder="misol@domain.uz" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-forgot')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Yuborish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let selectedRole = 'customer';
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const errorBox = document.getElementById('auth-error-box');
+            errorBox.style.display = 'none';
+
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+            }
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('role-card-customer').classList.toggle('selected', role === 'customer');
+            document.getElementById('role-card-developer').classList.toggle('selected', role === 'developer');
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('auth-error-box');
+
+            if (!email || password.length < 6) {
+                errorBox.style.display = 'block';
+                errorBox.textContent = "Email yoki parol xato!";
+                return;
+            }
+
+            // Determine role by email domain or default to customer
+            let role = 'customer';
+            if (email.includes('admin')) role = 'admin';
+            else if (email.includes('dev')) role = 'developer';
+
+            const user = {
+                id: 'usr-' + Date.now(),
+                name: email.split('@')[0],
+                email: email,
+                phone: '+998 90 000 00 00',
+                role: role,
+                verified: true
+            };
+
+            siteHub.setCurrentUser(user);
+            siteHub.showToast(`Xush kelibsiz, ${user.name}!`, 'success');
+            redirectToRole(role);
+        }
+
+        function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const errorBox = document.getElementById('auth-error-box');
+
+            if (password.length < 6) {
+                errorBox.style.display = 'block';
+                errorBox.textContent = "Parol kamida 6 ta belgidan iborat bo'lishi kerak!";
+                return;
+            }
+
+            const newUser = {
+                id: 'usr-' + Date.now(),
+                name: name,
+                email: email,
+                phone: phone,
+                role: selectedRole,
+                verified: false
+            };
+
+            siteHub.setCurrentUser(newUser);
+            siteHub.showToast("Ro'yxatdan muvaffaqiyatli o'tdingiz!", 'success');
+            redirectToRole(selectedRole);
+        }
+
+        function quickLogin(role) {
+            const users = {
+                customer: {
+                    id: 'user-cust-1',
+                    name: 'Otabek Umarov',
+                    email: 'otabek@client.uz',
+                    phone: '+998 90 111 22 33',
+                    role: 'customer',
+                    verified: true
+                },
+                developer: {
+                    id: 'dev-001',
+                    name: 'Azizbek Rahimov',
+                    email: 'azizbek@dev.uz',
+                    phone: '+998 93 444 55 66',
+                    role: 'developer',
+                    verified: true,
+                    card_number: '8600 1234 5678 9900',
+                    card_holder: 'AZIZBEK RAHIMOV'
+                },
+                admin: {
+                    id: 'admin-001',
+                    name: 'SiteHub Admin',
+                    email: 'admin@sitehub.uz',
+                    phone: '+998 99 999 99 99',
+                    role: 'admin',
+                    verified: true
+                }
+            };
+
+            const user = users[role];
+            siteHub.setCurrentUser(user);
+            siteHub.showToast(`${user.name} (${role.toUpperCase()}) hisobiga kirildi!`, 'success');
+            redirectToRole(role);
+        }
+
+        function redirectToRole(role) {
+            setTimeout(() => {
+                if (role === 'admin') window.location.href = 'admin.html';
+                else if (role === 'developer') window.location.href = 'developer.html';
+                else window.location.href = 'customer.html';
+            }, 500);
+        }
+
+        function mockSocialAuth(provider) {
+            siteHub.showToast(`${provider} orqali kirilmoqda...`, 'info');
+            setTimeout(() => {
+                quickLogin('customer');
+            }, 800);
+        }
+
+        function handleForgotSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            siteHub.closeModal('modal-forgot');
+            siteHub.showToast(`${email} manziliga tiklash havolasi yuborildi!`, 'success');
+        }
+
+        // Check URL parameter for role (e.g. login.html?role=developer)
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('role') === 'developer') {
+                switchAuthTab('register');
+                selectRole('developer');
+            }
+        });
+    </script>
+</body>
+</html>

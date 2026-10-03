@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace — Barcha Tayyor Web-Saytlar | SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link active" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">
+                        <span data-i18n="nav_login">Kirish</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container">
+            <!-- Catalog Layout: Filters Sidebar + Grid -->
+            <div class="catalog-layout">
+                
+                <!-- Left: Filter Sidebar -->
+                <aside class="filter-sidebar">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 1.15rem; font-weight: 800;">🔍 Filtrlar</h3>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="resetFilters()">Tozalash</button>
+                    </div>
+
+                    <!-- Category Filter (12 Categories) -->
+                    <div class="filter-block">
+                        <div class="filter-title">Kategoriyalar</div>
+                        <div class="filter-list" id="filter-categories-list">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Price Range Slider (0 to 50 mln) -->
+                    <div class="filter-block">
+                        <div class="filter-title">Maksimal narx</div>
+                        <div class="range-wrap">
+                            <input type="range" id="price-range" class="range-slider" min="500000" max="50000000" step="500000" value="50000000" oninput="handlePriceChange(this.value)">
+                            <div class="range-vals">
+                                <span>500,000 so'm</span>
+                                <span id="price-val-label" style="font-weight: 700; color: var(--primary);">50,000,000 so'm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating Filter -->
+                    <div class="filter-block">
+                        <div class="filter-title">Reyting</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="checkbox-label">
+                                <input type="radio" name="rating-filter" value="0" checked onchange="applyFilters()">
+                                <span>Barchasi</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="radio" name="rating-filter" value="4.0" onchange="applyFilters()">
+                                <span>⭐ 4.0 va undan yuqori</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="radio" name="rating-filter" value="4.5" onchange="applyFilters()">
+                                <span>⭐ 4.5 va undan yuqori</span>
+                            </label>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Right: Content & Grid -->
+                <section>
+                    <!-- Toolbar: Search + Sort + Count -->
+                    <div class="catalog-toolbar">
+                        <div class="search-box-catalog">
+                            <input type="text" id="catalog-search-input" class="form-input" placeholder="Sayt nomi yoki texnologiya bo'yicha qidiruv..." oninput="applyFilters()">
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span id="results-count-badge" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
+                                0 ta sayt
+                            </span>
+
+                            <select id="sort-select" class="form-select" style="width: auto;" onchange="applyFilters()">
+                                <option value="newest">Eng yangi</option>
+                                <option value="popular">Mashhur</option>
+                                <option value="bestseller">Eng ko'p sotilgan</option>
+                                <option value="price-asc">Narx: arzondan qimmatga ↑</option>
+                                <option value="price-desc">Narx: qimmatdan arzonga ↓</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sites Grid -->
+                    <div class="sites-grid" id="catalog-sites-grid">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="catalog-empty-state" style="display: none; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🔍</div>
+                        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 8px;">Hech qanday sayt topilmadi</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">Qidiruv mezonlarini o'zgartiring yoki filtrlarni tozalang.</p>
+                        <button class="btn btn-primary" onclick="resetFilters()">Filtrlarni tozalash</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub Marketplace. Barcha huquqlar himoyalangan.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Foydalanish shartlari</a>
+                    <a href="support.html">Yordam</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item active">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        let selectedCategories = new Set();
+        let maxPrice = 50000000;
+
+        function initCategoryCheckboxes() {
+            const list = document.getElementById('filter-categories-list');
+            list.innerHTML = siteHubCategories.map(cat => {
+                const name = cat[siteHub.currentLang] || cat.uz;
+                return `
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="${cat.slug}" onchange="toggleCategoryFilter('${cat.slug}')" id="cat-cb-${cat.slug}">
+                        <span>${cat.icon} ${name}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleCategoryFilter(slug) {
+            if (selectedCategories.has(slug)) {
+                selectedCategories.delete(slug);
+            } else {
+                selectedCategories.add(slug);
+            }
+            applyFilters();
+        }
+
+        function handlePriceChange(val) {
+            maxPrice = Number(val);
+            document.getElementById('price-val-label').textContent = siteHub.formatPrice(maxPrice);
+            applyFilters();
+        }
+
+        function resetFilters() {
+            selectedCategories.clear();
+            document.querySelectorAll('#filter-categories-list input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            maxPrice = 50000000;
+            document.getElementById('price-range').value = 50000000;
+            document.getElementById('price-val-label').textContent = siteHub.formatPrice(50000000);
+            
+            document.querySelector('input[name="rating-filter"][value="0"]').checked = true;
+            document.getElementById('catalog-search-input').value = '';
+            document.getElementById('sort-select').value = 'newest';
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('catalog-search-input').value.trim();
+            const ratingVal = Number(document.querySelector('input[name="rating-filter"]:checked').value);
+            const sortBy = document.getElementById('sort-select').value;
+
+            let sites = siteHub.getSites({
+                status: 'APPROVED',
+                search: search,
+                maxPrice: maxPrice,
+                minRating: ratingVal
+            });
+
+            if (selectedCategories.size > 0) {
+                sites = sites.filter(s => selectedCategories.has(s.category_slug));
+            }
+
+            // Sorting
+            if (sortBy === 'newest') {
+                sites.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            } else if (sortBy === 'popular') {
+                sites.sort((a, b) => b.rating - a.rating);
+            } else if (sortBy === 'bestseller') {
+                sites.sort((a, b) => b.sales_count - a.sales_count);
+            } else if (sortBy === 'price-asc') {
+                sites.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'price-desc') {
+                sites.sort((a, b) => b.price - a.price);
+            }
+
+            renderCatalogSites(sites);
+        }
+
+        function renderCatalogSites(sites) {
+            const grid = document.getElementById('catalog-sites-grid');
+            const emptyState = document.getElementById('catalog-empty-state');
+            const countBadge = document.getElementById('results-count-badge');
+
+            countBadge.textContent = `${sites.length} ta sayt topildi`;
+
+            if (sites.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.innerHTML = sites.map(site => {
+                const isFav = siteHub.isFavorite(site.id);
+                return `
+                    <div class="site-card">
+                        <div class="site-thumb-wrapper">
+                            ${site.is_new ? '<div class="site-badge-pos"><span class="badge badge-new">YANGI</span></div>' : ''}
+                            <button class="site-fav-btn ${isFav ? 'active' : ''}" onclick="siteHub.toggleFavorite('${site.id}'); applyFilters();" title="Sevimlilarga qo'shish">
+                                ${isFav ? '❤️' : '🤍'}
+                            </button>
+                            <img src="${site.screenshots[0]}" alt="${site.title}" class="site-thumb" loading="lazy">
+                        </div>
+                        <div class="site-body">
+                            <span class="site-category-tag">${site.category_slug.toUpperCase()}</span>
+                            <h3 class="site-title">${site.title}</h3>
+                            <div class="site-tech-tags">
+                                ${(site.tech || []).slice(0, 3).map(t => `<span class="tech-tag">${t}</span>`).join('')}
+                            </div>
+                            <div class="site-developer-row">
+                                <div class="dev-avatar-sm">${site.developer_avatar || 'D'}</div>
+                                <span class="dev-name-sm">${site.developer_name}</span>
+                            </div>
+                            <div class="site-meta-row">
+                                <div class="site-price">${siteHub.formatPrice(site.price)}</div>
+                                <div class="site-rating-box">
+                                    <span>⭐ ${site.rating}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.75rem;">(${site.sales_count} sotuv)</span>
+                                </div>
+                            </div>
+                            <div class="site-actions-row">
+                                <a href="product.html?id=${site.id}" class="btn btn-primary btn-sm">Batafsil</a>
+                                <a href="${site.demo_url || '#'}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Demo ↗</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCategoryCheckboxes();
+
+            // Check URL parameters (e.g. ?category=restaurant or ?q=CRM)
+            const urlParams = new URLSearchParams(window.location.search);
+            const catParam = urlParams.get('category');
+            const qParam = urlParams.get('q');
+
+            if (catParam) {
+                selectedCategories.add(catParam);
+                const cb = document.getElementById(`cat-cb-${catParam}`);
+                if (cb) cb.checked = true;
+            }
+
+            if (qParam) {
+                document.getElementById('catalog-search-input').value = qParam;
+            }
+
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

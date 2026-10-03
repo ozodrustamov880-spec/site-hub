@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasturchilar — SiteHub Marketplace</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="marketplace.html" class="nav-link" data-i18n="nav_marketplace">Marketplace</a>
+                <a href="marketplace.html#categories" class="nav-link" data-i18n="nav_categories">Kategoriyalar</a>
+                <a href="developers.html" class="nav-link active" data-i18n="nav_developers">Dasturchilar</a>
+                <a href="about.html" class="nav-link" data-i18n="nav_about">Ma'lumotlar</a>
+                <a href="support.html" class="nav-link" data-i18n="nav_support">Yordam</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span class="current-lang-code">UZ</span> ▾
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-option" onclick="siteHub.setLanguage('uz')">🇺🇿 O'zbekcha</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('ru')">🇷🇺 Русский</div>
+                        <div class="lang-option" onclick="siteHub.setLanguage('en')">🇬🇧 English</div>
+                    </div>
+                </div>
+
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+
+                <a href="customer.html#favorites" class="fav-header-btn" title="Sevimlilar">
+                    ❤️
+                    <span class="badge-count fav-count-badge" style="display: none;">0</span>
+                </a>
+
+                <div id="header-auth-section">
+                    <a href="login.html" class="btn btn-primary btn-sm">Kirish</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container">
+            <!-- Header Section -->
+            <div style="text-align: center; max-width: 700px; margin: 0 auto 40px;">
+                <div class="badge badge-verified" style="margin-bottom: 12px;">SARALANGAN MUTAXASSISLAR</div>
+                <h1 style="font-size: 2.4rem; font-weight: 800; margin-bottom: 12px;">SiteHub Professional Dasturchilari</h1>
+                <p style="color: var(--text-secondary); font-size: 1.05rem;">
+                    Platformamizdagi eng tajribali dasturchilar, ularning tayyor ishlari va mijozlar tomonidan berilgan baholari.
+                </p>
+            </div>
+
+            <!-- Toolbar: Search + Sort -->
+            <div class="catalog-toolbar" style="margin-bottom: 32px;">
+                <div class="search-box-catalog">
+                    <input type="text" id="dev-search-input" class="form-input" placeholder="Dasturchi ismi yoki ixtisosligi bo'yicha qidiruv..." oninput="filterDevelopers()">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="dev-count-label" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">3 nafar dasturchi</span>
+                    <select id="dev-sort-select" class="form-select" style="width: auto;" onchange="filterDevelopers()">
+                        <option value="rating">Reyting bo'yicha (Yuqori)</option>
+                        <option value="sales">Sotuvlar soni bo'yicha</option>
+                        <option value="sites">Saytlar soni bo'yicha</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Developers Grid -->
+            <div class="sites-grid" id="developers-grid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SiteHub. Barcha huquqlar himoyalangan.</p>
+                <div style="display: flex; gap: 16px;">
+                    <a href="about.html">Biz haqimizda</a>
+                    <a href="support.html">Yordam</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🏠</span>
+                <span>Asosiy</span>
+            </a>
+            <a href="marketplace.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">🛍️</span>
+                <span>Katalog</span>
+            </a>
+            <a href="customer.html#favorites" class="mobile-nav-item">
+                <span class="mobile-nav-icon">❤️</span>
+                <span>Sevimlilar</span>
+            </a>
+            <a href="chat.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">💬</span>
+                <span>Chat</span>
+            </a>
+            <a href="customer.html" class="mobile-nav-item">
+                <span class="mobile-nav-icon">👤</span>
+                <span>Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        const DEVELOPERS_DATA = [
+            {
+                id: 'dev-001',
+                name: 'Azizbek Rahimov',
+                avatar: 'A',
+                bio: 'Fullstack web dasturchi. 5 yillik tajriba. Restoran, Landing va murakkab CRM tizimlariga ixtisoslashgan.',
+                rating: 4.95,
+                sales_count: 38,
+                sites_count: 12,
+                verified: true
+            },
+            {
+                id: 'dev-002',
+                name: 'Malika Sobirova',
+                avatar: 'M',
+                bio: 'UI/UX dizayner va Frontend muhandis. Internet-do\'konlar, savdo platformalari va Telegram WebApp yaratuvchisi.',
+                rating: 4.88,
+                sales_count: 42,
+                sites_count: 9,
+                verified: true
+            },
+            {
+                id: 'dev-003',
+                name: 'Jasur Qodirov',
+                avatar: 'J',
+                bio: 'Modern web master. Minimalist portfoliolar, mehmonxona bron qilish tizimlari va korporativ saytlar ustasi.',
+                rating: 4.75,
+                sales_count: 17,
+                sites_count: 6,
+                verified: true
+            }
+        ];
+
+        function filterDevelopers() {
+            const query = document.getElementById('dev-search-input').value.toLowerCase();
+            const sortBy = document.getElementById('dev-sort-select').value;
+
+            let list = DEVELOPERS_DATA.filter(d => 
+                d.name.toLowerCase().includes(query) || d.bio.toLowerCase().includes(query)
+            );
+
+            if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
+            else if (sortBy === 'sales') list.sort((a, b) => b.sales_count - a.sales_count);
+            else if (sortBy === 'sites') list.sort((a, b) => b.sites_count - a.sites_count);
+
+            renderDevelopers(list);
+        }
+
+        function renderDevelopers(list) {
+            const grid = document.getElementById('developers-grid');
+            document.getElementById('dev-count-label').textContent = `${list.length} nafar dasturchi`;
+
+            grid.innerHTML = list.map(dev => `
+                <div class="card" style="display: flex; flex-direction: column; text-align: center; align-items: center;">
+                    <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(99,102,241,0.35);">
+                        ${dev.avatar}
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 800;">${dev.name}</h3>
+                        ${dev.verified ? '<span class="badge badge-verified" title="Tasdiqlangan dasturchi (3+ sayt, 4.5+ reyting)">✓ Tasdiqlangan</span>' : ''}
+                    </div>
+
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; min-height: 2.6em;">
+                        ${dev.bio}
+                    </p>
+
+                    <!-- Stats Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 20px;">
+                        <div>
+                            <div style="font-weight: 800; font-size: 1.1rem; color: #f59e0b;">⭐ ${dev.rating}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Reyting</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">🌐 ${dev.sites_count}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Saytlar</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1.1rem; color: var(--success);">🔥 ${dev.sales_count}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Sotuvlar</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+                        <a href="chat.html?devId=${dev.id}" class="btn btn-primary btn-sm">💬 Bog'lanish</a>
+                        <a href="marketplace.html?q=${encodeURIComponent(dev.name)}" class="btn btn-secondary btn-sm">Saytlari →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDevelopers(DEVELOPERS_DATA);
+        });
+    </script>
+</body>
+</html>

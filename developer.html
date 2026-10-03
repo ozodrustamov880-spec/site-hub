@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasturchi Paneli — SiteHub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">S</div>
+                <span class="logo-text">SiteHub</span>
+            </a>
+
+            <div style="font-weight: 700; color: var(--primary);">
+                💻 Dasturchi Ish Joyi (Developer Console)
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
+                <div id="header-auth-section"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <div class="dash-menu">
+                <a href="#overview" class="dash-menu-item active" id="menu-dash-overview" onclick="switchDevTab('overview')">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="javascript:void(0)" class="dash-menu-item" onclick="siteHub.openModal('modal-add-site')">
+                    <span>➕</span>
+                    <span>Yangi sayt qo'shish</span>
+                </a>
+                <!-- Gated Chat Item -->
+                <div id="dev-chat-menu-container">
+                    <!-- Populated dynamically: Chat or 🔒 Chat yopiq -->
+                </div>
+                <a href="javascript:void(0)" class="dash-menu-item" onclick="siteHub.openModal('modal-card')">
+                    <span>💳</span>
+                    <span>Karta raqami</span>
+                </a>
+            </div>
+
+            <div>
+                <button onclick="siteHub.logout()" class="btn btn-secondary btn-block">
+                    🚪 Chiqish
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <main class="dashboard-main">
+            <!-- Stats -->
+            <div class="dashboard-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">🌐</div>
+                    <div>
+                        <div class="stat-val" id="stat-dev-total-sites">0</div>
+                        <div class="stat-lbl">Jami Saytlarim</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-light); color: var(--success);">✓</div>
+                    <div>
+                        <div class="stat-val" id="stat-dev-approved-sites">0</div>
+                        <div class="stat-lbl">Tasdiqlangan</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">💰</div>
+                    <div>
+                        <div class="stat-val" id="stat-dev-earnings">0 so'm</div>
+                        <div class="stat-lbl">Sof Daromad</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(14,165,233,0.15); color: #0ea5e9;">📦</div>
+                    <div>
+                        <div class="stat-val" id="stat-dev-orders-count">0</div>
+                        <div class="stat-lbl">Buyurtmalar</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Developer's Sites Table -->
+            <div style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="font-size: 1.4rem; font-weight: 800;">Mening Saytlarim</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Yuklangan saytlar holati va tahrirlash</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="siteHub.openModal('modal-add-site')">
+                        + Yangi sayt yuklash
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Sayt nomi</th>
+                                <th>Kategoriya</th>
+                                <th>Narx</th>
+                                <th>Holat</th>
+                                <th>Sotuvlar</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dev-sites-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Developer's Client Orders Table (Domain Setup) -->
+            <div>
+                <div style="margin-bottom: 20px;">
+                    <h2 style="font-size: 1.4rem; font-weight: 800;">Kelib Tushgan Buyurtmalar</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Mijozlar buyurtmalari va domen sozlash topshiriqlari</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th># Buyurtma</th>
+                                <th>Sayt</th>
+                                <th>Summa</th>
+                                <th>Holat</th>
+                                <th>Domen holati</th>
+                                <th>Amal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dev-orders-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add New Website (Netlify URL mandatory) -->
+    <div class="modal-backdrop" id="modal-add-site">
+        <div class="modal-box" style="max-width: 620px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Yangi Sayt Qo'shish</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-add-site')">✕</button>
+            </div>
+            <form onsubmit="handleCreateSite(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Sayt nomi *</label>
+                        <input type="text" id="new-site-title" class="form-input" placeholder="masalan: Solis — Restoran va Kafe Sayti" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                        <div class="form-group">
+                            <label class="form-label">Kategoriya *</label>
+                            <select id="new-site-cat" class="form-select" required>
+                                <!-- Categories populated -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Narxi (so'mda) *</label>
+                            <input type="number" id="new-site-price" class="form-input" placeholder="1800000" min="100000" step="50000" required>
+                        </div>
+                    </div>
+
+                    <!-- Netlify URL (MANDATORY) -->
+                    <div class="form-group" style="background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <label class="form-label" style="color: var(--primary); font-weight: 700;">🌐 Netlify URL manzili (Majburiy) *</label>
+                        <input type="url" id="new-site-netlify" class="form-input" placeholder="https://sayt-nomi.netlify.app" required>
+                        <span class="form-hint">Saytingizning Netlify'dagi ishchi havolasi (Live Preview uchun ishlatiladi)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Asosiy skrinshot rasm URL *</label>
+                        <input type="url" id="new-site-img" class="form-input" placeholder="https://images.unsplash.com/..." required>
+                        <span class="form-hint">Sayt ko'rinishining aniq rasmi (Unsplash yoki to'g'ridan-to'g'ri rasm havolasi)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ishlatilgan texnologiyalar (vergul bilan)</label>
+                        <input type="text" id="new-site-tech" class="form-input" placeholder="HTML5, CSS3, JavaScript, Tailwind" value="HTML5, CSS3, JavaScript">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sayt tavsifi *</label>
+                        <textarea id="new-site-desc" class="form-textarea" placeholder="Saytning asosiy imkoniyatlari, sahifalari va xususiyatlarini yozing..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-add-site')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Saqlash (Moderatsiyaga yuborish)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Domain Setup by Developer -->
+    <div class="modal-backdrop" id="modal-domain-setup">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Domen Sozlamalari</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-domain-setup')">✕</button>
+            </div>
+            <form onsubmit="handleDomainSetupSubmit(event)">
+                <div class="modal-body">
+                    <div style="background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-md); margin-bottom: 18px;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Mijoz tanlagan domen:</span>
+                        <div id="dev-setup-domain-name" style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">domain.uz</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Domen registratori</label>
+                        <select id="domain-registrar-sel" class="form-select">
+                            <option value="UZINFOCOM">UZINFOCOM (.UZ)</option>
+                            <option value="Namecheap">Namecheap</option>
+                            <option value="GoDaddy">GoDaddy</option>
+                            <option value="Reg.ru">Reg.ru</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Domen tugash muddati (1 yil)</label>
+                        <input type="date" id="domain-expiry-date" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mijozga eslatma yoki DNS yo'riqnomasi</label>
+                        <textarea id="domain-dev-note" class="form-textarea" placeholder="Domen DNS yozuvlari Netlify'ga ulandi, SSL sertifikat 15 daqiqada faollashadi."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-domain-setup')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">
+                        ✓ Domen sotib olindi va sozlandi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Card Setup -->
+    <div class="modal-backdrop" id="modal-card">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Pul Yechib Olish Kartasi</h3>
+                <button type="button" class="modal-close-btn" onclick="siteHub.closeModal('modal-card')">✕</button>
+            </div>
+            <form onsubmit="handleCardSave(event)">
+                <div class="modal-body">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+                        Saytlaringiz sotilganda sof mablag' to'g'ridan-to'g'ri ushbu kartangizga o'tkaziladi.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label">16 xonali Karta raqami (Uzcard / Humo)</label>
+                        <input type="text" id="dev-card-input" class="form-input" placeholder="8600 0000 0000 0000" maxlength="19" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Karta egasining to'liq ismi</label>
+                        <input type="text" id="dev-card-holder-input" class="form-input" placeholder="AZIZBEK RAHIMOV" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="siteHub.closeModal('modal-card')">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentEditingOrderId = null;
+
+        function getDevSites() {
+            // Sites uploaded by this developer (or all demo sites if no filter)
+            const all = siteHub.getSites();
+            return all;
+        }
+
+        function renderDevConsole() {
+            const sites = getDevSites();
+            const orders = siteHub.getOrders();
+
+            const approvedCount = sites.filter(s => s.status === 'APPROVED').length;
+            const totalEarnings = orders.filter(o => o.status === 'COMPLETED').reduce((sum, o) => sum + (o.developer_amount || 0), 0);
+
+            document.getElementById('stat-dev-total-sites').textContent = sites.length;
+            document.getElementById('stat-dev-approved-sites').textContent = approvedCount;
+            document.getElementById('stat-dev-earnings').textContent = siteHub.formatPrice(totalEarnings);
+            document.getElementById('stat-dev-orders-count').textContent = orders.length;
+
+            // Render Chat Sidebar Item (Gated Rule: Must have >= 1 site uploaded!)
+            const chatMenuContainer = document.getElementById('dev-chat-menu-container');
+            if (sites.length > 0) {
+                chatMenuContainer.innerHTML = `
+                    <a href="chat.html" class="dash-menu-item">
+                        <span>💬</span>
+                        <span>Chat & Hamjamiyat</span>
+                    </a>
+                `;
+            } else {
+                chatMenuContainer.innerHTML = `
+                    <div class="dash-menu-item" style="opacity: 0.6; cursor: not-allowed;" onclick="siteHub.showToast('🔒 Chatdan foydalanish uchun kamida 1 ta sayt yuklashingiz kerak!', 'warning')">
+                        <span>🔒</span>
+                        <span>Chat yopiq</span>
+                    </div>
+                `;
+            }
+
+            // Render Sites Table
+            const sitesTbody = document.getElementById('dev-sites-tbody');
+            if (sites.length === 0) {
+                sitesTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px;">Hozircha sayt yuklamagansiz.</td></tr>`;
+            } else {
+                sitesTbody.innerHTML = sites.map(s => {
+                    let badge = '<span class="badge badge-pending">PENDING</span>';
+                    if (s.status === 'APPROVED') badge = '<span class="badge badge-approved">APPROVED</span>';
+                    else if (s.status === 'REJECTED') badge = '<span class="badge badge-rejected">REJECTED</span>';
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${s.title}</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);"><a href="${s.netlify_url}" target="_blank" rel="noopener">🌐 ${s.netlify_url}</a></div>
+                            </td>
+                            <td>${s.category_slug.toUpperCase()}</td>
+                            <td style="font-weight: 700; color: var(--primary);">${siteHub.formatPrice(s.price)}</td>
+                            <td>${badge}</td>
+                            <td>${s.sales_count || 0}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDevSite('${s.id}')">O'chirish</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render Orders Table
+            const ordersTbody = document.getElementById('dev-orders-tbody');
+            if (orders.length === 0) {
+                ordersTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px;">Hozircha yangi buyurtmalar yo'q.</td></tr>`;
+            } else {
+                ordersTbody.innerHTML = orders.map(ord => {
+                    let actionHtml = '';
+                    if (ord.domain_status === 'AGREED') {
+                        actionHtml = `
+                            <button class="btn btn-sm btn-primary" onclick="openDomainSetupModal('${ord.id}')">
+                                🌐 Domenni sozlash
+                            </button>
+                        `;
+                    } else if (ord.domain_status === 'CONFIGURED') {
+                        actionHtml = `<span style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">Mijoz tasdiqlashi kutilmoqda</span>`;
+                    } else if (ord.domain_status === 'COMPLETED') {
+                        actionHtml = `<span style="font-size: 0.85rem; color: var(--success); font-weight: 700;">✓ Sayt topshirildi</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td><strong>${ord.order_number}</strong></td>
+                            <td>${ord.site_title}</td>
+                            <td style="font-weight: 700;">${siteHub.formatPrice(ord.developer_amount || ord.total)}</td>
+                            <td><span class="badge badge-approved">${ord.status}</span></td>
+                            <td><strong>${ord.domain_name}</strong> (${ord.domain_status})</td>
+                            <td>${actionHtml}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function populateCategorySelect() {
+            const sel = document.getElementById('new-site-cat');
+            sel.innerHTML = siteHubCategories.map(c => `
+                <option value="${c.slug}">${c.icon} ${c.uz}</option>
+            `).join('');
+        }
+
+        function handleCreateSite(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-site-title').value.trim();
+            const cat = document.getElementById('new-site-cat').value;
+            const price = Number(document.getElementById('new-site-price').value);
+            const netlify = document.getElementById('new-site-netlify').value.trim();
+            const img = document.getElementById('new-site-img').value.trim();
+            const techStr = document.getElementById('new-site-tech').value.trim();
+            const desc = document.getElementById('new-site-desc').value.trim();
+
+            const newSite = {
+                id: 'site-' + Date.now(),
+                slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                title: title,
+                description: desc,
+                price: price,
+                category_slug: cat,
+                developer_id: siteHub.currentUser ? siteHub.currentUser.id : 'dev-001',
+                developer_name: siteHub.currentUser ? siteHub.currentUser.name : 'Azizbek Rahimov',
+                developer_avatar: 'A',
+                screenshots: [img],
+                demo_url: netlify,
+                netlify_url: netlify,
+                tech: techStr.split(',').map(t => t.trim()),
+                status: 'PENDING', // Moderation queue
+                rating: 5.0,
+                sales_count: 0,
+                is_new: true,
+                domain_price: 120000,
+                created_at: new Date().toISOString()
+            };
+
+            siteHub.saveSite(newSite);
+            siteHub.closeModal('modal-add-site');
+            siteHub.showToast("Sayt saqlandi va moderatsiyaga yuborildi (PENDING)!", "success");
+            renderDevConsole();
+        }
+
+        function deleteDevSite(id) {
+            if (confirm("Rostdan ham ushbu saytni o'chirmoqchimisiz?")) {
+                siteHub.deleteSite(id);
+                siteHub.showToast("Sayt o'chirildi.", "info");
+                renderDevConsole();
+            }
+        }
+
+        function openDomainSetupModal(orderId) {
+            currentEditingOrderId = orderId;
+            const order = siteHub.getOrders().find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('dev-setup-domain-name').textContent = order.domain_name;
+            // Set default date to 1 year from now
+            const oneYear = new Date();
+            oneYear.setFullYear(oneYear.getFullYear() + 1);
+            document.getElementById('domain-expiry-date').value = oneYear.toISOString().split('T')[0];
+
+            siteHub.openModal('modal-domain-setup');
+        }
+
+        function handleDomainSetupSubmit(e) {
+            e.preventDefault();
+            if (!currentEditingOrderId) return;
+
+            const order = siteHub.getOrders().find(o => o.id === currentEditingOrderId);
+            if (order) {
+                order.domain_status = 'CONFIGURED';
+                order.domain_registrar = document.getElementById('domain-registrar-sel').value;
+                order.domain_expiry_date = document.getElementById('domain-expiry-date').value;
+                order.domain_notes = document.getElementById('domain-dev-note').value;
+
+                siteHub.saveOrder(order);
+                siteHub.closeModal('modal-domain-setup');
+                siteHub.playNotificationSound();
+                siteHub.showToast("Domen sozlandi deb belgilandi va mijozga bildirishnoma yuborildi!", "success");
+                renderDevConsole();
+            }
+        }
+
+        function handleCardSave(e) {
+            e.preventDefault();
+            const card = document.getElementById('dev-card-input').value.trim();
+            const holder = document.getElementById('dev-card-holder-input').value.trim();
+
+            if (siteHub.currentUser) {
+                siteHub.currentUser.card_number = card;
+                siteHub.currentUser.card_holder = holder;
+                siteHub.setCurrentUser(siteHub.currentUser);
+            }
+
+            siteHub.closeModal('modal-card');
+            siteHub.showToast("Karta ma'lumotlari saqlandi!", "success");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCategorySelect();
+            renderDevConsole();
+        });
+    </script>
+</body>
+</html>
