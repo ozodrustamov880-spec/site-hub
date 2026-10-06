@@ -22,7 +22,7 @@
 
             <div class="nav-actions">
                 <button class="theme-toggle-btn" onclick="siteHub.toggleTheme()" title="Tungi rejim">🌙</button>
-                <a href="index.html" class="btn btn-secondary btn-sm">← Bosh sahifaga</a>
+                <span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 8px 14px; font-weight: 600; border-radius: var(--radius-full);">🔒 Xavfsiz Kirish</span>
             </div>
         </div>
     </header>
@@ -67,6 +67,11 @@
         <!-- Right Side: Login / Register Form Tabs -->
         <div class="auth-main">
             <div class="auth-box">
+                <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); color: var(--primary); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 20px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.25rem;">👋</span>
+                    <span>SiteHub platformasidan foydalanish uchun iltimos, avval hisobingizga kiring yoki ro'yxatdan o'ting.</span>
+                </div>
+
                 <div class="auth-tabs">
                     <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Kirish</div>
                     <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Ro'yxatdan o'tish</div>
@@ -322,10 +327,18 @@
         }
 
         function redirectToRole(role) {
+            const params = new URLSearchParams(window.location.search);
+            const redirectUrl = params.get('redirect');
             setTimeout(() => {
-                if (role === 'admin') window.location.href = 'admin.html';
-                else if (role === 'developer') window.location.href = 'developer.html';
-                else window.location.href = 'customer.html';
+                if (redirectUrl && !redirectUrl.includes('login.html')) {
+                    window.location.href = decodeURIComponent(redirectUrl);
+                } else if (role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (role === 'developer') {
+                    window.location.href = 'developer.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
             }, 500);
         }
 

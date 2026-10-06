@@ -325,9 +325,67 @@ class SiteHubApp {
         this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER)) || null;
         this.favorites = JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES)) || [];
         
+        // Majburiy tizimga kirish (Login First) himoyasi
+        if (!this.enforceAuthProtection()) {
+            return;
+        }
+
         this.initDataStores();
         this.applyTheme(this.currentTheme);
         this.initAudio();
+    }
+
+    getCurrentPageName() {
+        const path = window.location.pathname.replace(/\\/g, '/');
+        const lastPart = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+        return lastPart.toLowerCase();
+    }
+
+    enforceAuthProtection() {
+        const page = this.getCurrentPageName();
+        const isLoginPage = page === 'login.html';
+
+        if (!this.currentUser) {
+            // Tizimga kirmagan bo'lsa va login sahifasida bo'lmasa -> login.html ga yo'naltirish
+            if (!isLoginPage) {
+                const searchAndHash = window.location.search + window.location.hash;
+                const redirectTarget = (page && page !== 'index.html') ? (page + searchAndHash) : '';
+                const query = redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : '';
+                window.location.replace(`login.html${query}`);
+                return false;
+            }
+        } else {
+            // Foydalanuvchi tizimga kirgan bo'lsa va login.html ga tashrif buyursa
+            if (isLoginPage) {
+                const params = new URLSearchParams(window.location.search);
+                const redirect = params.get('redirect');
+                if (redirect && !redirect.includes('login.html')) {
+                    window.location.replace(decodeURIComponent(redirect));
+                    return false;
+                }
+                if (this.currentUser.role === 'admin') {
+                    window.location.replace('admin.html');
+                } else if (this.currentUser.role === 'developer') {
+                    window.location.replace('developer.html');
+                } else {
+                    window.location.replace('index.html');
+                }
+                return false;
+            }
+
+            // Rol bo'yicha maxsus sahifalarni himoyalash
+            if (page === 'admin.html' && this.currentUser.role !== 'admin') {
+                alert("Ushbu bo'lim faqat administratorlar uchun mo'ljallangan!");
+                window.location.replace('index.html');
+                return false;
+            }
+            if (page === 'developer.html' && this.currentUser.role !== 'developer' && this.currentUser.role !== 'admin') {
+                alert("Ushbu bo'lim faqat dasturchilar uchun mo'ljallangan!");
+                window.location.replace('index.html');
+                return false;
+            }
+        }
+        return true;
     }
 
     initDataStores() {
@@ -628,8 +686,8 @@ class SiteHubApp {
         this.setCurrentUser(null);
         this.showToast("Hisobdan muvaffaqiyatli chiqildi", "info");
         setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 600);
+            window.location.href = 'login.html';
+        }, 500);
     }
 
     // Render User Header button / Profile link
