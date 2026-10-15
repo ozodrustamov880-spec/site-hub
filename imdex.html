@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Robot – Kamera + Ovozli javob</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000; color: #fff; width: 100vw; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow-x: hidden; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 12px;
+        }
+        .container {
+            width: 100%; max-width: 700px; display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+        .robot-face-wrapper {
+            position: relative; width: 100%; max-width: 650px; aspect-ratio: 4/3;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #16161a 0%, #000 85%);
+            border-radius: 50px; padding: 20px;
+            border: 2px solid rgba(255,255,255,0.08); box-shadow: 0 0 70px rgba(255,255,255,0.05);
+        }
+        .camera-circle {
+            position: absolute; top: 10px; right: 15px;
+            width: 80px; height: 80px; border-radius: 50%; overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.4); box-shadow: 0 0 30px rgba(0,200,255,0.3);
+            z-index: 10; background: #222;
+        }
+        .camera-circle video {
+            width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+        }
+        .eyes-container {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 70%; max-width: 360px; margin-bottom: 4vh;
+        }
+        .eye {
+            width: 40%; aspect-ratio: 1/1; max-width: 120px;
+            background: #fff; border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255,255,255,0.8);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .eye.closed { transform: scaleY(0.1) scaleX(0.9); border-radius: 20px; }
+        .mouth-container {
+            display: flex; justify-content: center; align-items: center;
+            width: 50%; max-width: 180px; height: 60px;
+        }
+        .mouth {
+            width: 80%; max-width: 120px; height: 18px;
+            background: #fff; border-radius: 30px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.7);
+            transition: all 0.2s ease;
+        }
+        .robot-face-wrapper.listening .eye { transform: scale(0.85) translateY(10px); border-radius: 40%; }
+        .robot-face-wrapper.listening .mouth { width: 50%; height: 10px; border-radius: 12px; }
+        .robot-face-wrapper.thinking .eye { transform: scaleY(0.3) scaleX(0.85); border-radius: 20px; }
+        .robot-face-wrapper.thinking .mouth { width: 55%; height: 6px; border-radius: 4px; transform: translateY(12px) rotate(-4deg); }
+        .robot-face-wrapper.speaking .eye { transform: scale(1.05); }
+        .robot-face-wrapper.speaking .mouth { width: 65%; height: 40px; border-radius: 50px; animation: talkAnim 0.15s infinite alternate; }
+        @keyframes talkAnim { 0% { height: 18px; border-radius: 30px; } 100% { height: 50px; border-radius: 50px; } }
+        .robot-face-wrapper.happy .eye { transform: scale(0.9) translateY(-6px); border-radius: 40% 40% 50% 50%; }
+        .robot-face-wrapper.happy .mouth { width: 45%; height: 28px; border-radius: 0 0 50px 50px; transform: translateY(-4px); }
+        .robot-face-wrapper.surprised .eye { transform: scale(1.15); }
+        .robot-face-wrapper.surprised .mouth { width: 30%; height: 35px; border-radius: 50%; transform: translateY(-4px); }
+        .robot-face-wrapper.angry .eye { transform: scaleY(0.9) skewX(-8deg); border-radius: 45%; }
+        .robot-face-wrapper.angry .mouth { width: 40%; height: 12px; border-radius: 5px; transform: rotate(5deg) translateY(10px); background: #ff9999; }
+        .robot-face-wrapper.sad .eye { transform: scaleY(0.85) translateY(10px); border-radius: 45%; }
+        .robot-face-wrapper.sad .mouth { width: 30%; height: 8px; border-radius: 4px; transform: rotate(-10deg) translateY(20px); background: #88aaff; }
+        .robot-face-wrapper.crying .eye { transform: scaleY(0.8) translateY(12px); border-radius: 45%; background: #bbddff; box-shadow: 0 0 30px #88bbff; }
+        .robot-face-wrapper.crying .mouth { width: 28%; height: 6px; border-radius: 3px; transform: rotate(-12deg) translateY(24px); background: #88aaff; }
+        .robot-face-wrapper.laughing .eye { transform: scale(0.85) translateY(-10px); border-radius: 40% 40% 30% 30%; }
+        .robot-face-wrapper.laughing .mouth { width: 70%; height: 35px; border-radius: 0 0 60px 60px; transform: translateY(-6px); background: #ffcc66; }
+        .robot-face-wrapper.shy .eye { transform: scale(0.8) translateY(8px); border-radius: 50%; box-shadow: 0 0 20px #ffaaaa; }
+        .robot-face-wrapper.shy .mouth { width: 20%; height: 6px; border-radius: 10px; transform: translateY(12px); background: #ffaaaa; }
+        .robot-face-wrapper.scared .eye { transform: scale(1.3) translateY(-8px); border-radius: 50% 50% 40% 40%; box-shadow: 0 0 50px #aaccff; }
+        .robot-face-wrapper.scared .mouth { width: 35%; height: 28px; border-radius: 50%; transform: translateY(-6px); background: #ddeeff; }
+        .ui-overlay {
+            width: 100%; max-width: 650px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .input-group { display: flex; gap: 8px; width: 100%; }
+        input[type="text"] {
+            flex: 1; min-width: 0;
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.25); padding: 14px 18px; font-size: 16px;
+            color: #fff; border-radius: 50px; outline: none; transition: border 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus { border-color: #fff; box-shadow: 0 0 25px rgba(255,255,255,0.25); }
+        input::placeholder { color: rgba(255,255,255,0.4); }
+        button {
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: #fff;
+            border: 2px solid rgba(255,255,255,0.3); padding: 14px 22px; font-size: 16px;
+            font-weight: 600; border-radius: 50px; cursor: pointer; transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+        }
+        button:hover { background: rgba(255,255,255,0.3); border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.25); transform: scale(1.02); }
+        button:active { transform: scale(0.97); }
+        .action-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; flex-wrap: wrap; }
+        #status {
+            font-size: 14px; color: rgba(255,255,255,0.65); text-align: center;
+            background: rgba(255,255,255,0.04); padding: 8px 18px; border-radius: 40px;
+            backdrop-filter: blur(4px); width: 100%; min-height: 38px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .camera-toggle {
+            display: flex; gap: 8px; align-items: center; font-size: 14px;
+        }
+        @media (max-width: 480px) {
+            .robot-face-wrapper { border-radius: 30px; padding: 15px; }
+            .camera-circle { width: 60px; height: 60px; top: 6px; right: 8px; }
+            .eye { max-width: 75px; }
+            .mouth { max-width: 70px; height: 14px; }
+            input { font-size: 14px; padding: 12px 14px; }
+            button { font-size: 14px; padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="robot-face-wrapper" id="robot-face">
+            <div class="camera-circle" id="cameraContainer">
+                <video id="cameraFeed" autoplay muted playsinline></video>
+            </div>
+            <div class="eyes-container">
+                <div class="eye" id="left-eye"></div>
+                <div class="eye" id="right-eye"></div>
+            </div>
+            <div class="mouth-container">
+                <div class="mouth" id="mouth"></div>
+            </div>
+        </div>
+
+        <div class="ui-overlay">
+            <div class="input-group">
+                <input type="text" id="user-input" placeholder="Menga yozing..." />
+                <button id="send-btn">Yuborish</button>
+            </div>
+            <div class="action-buttons">
+                <button id="mic-btn">🎙️ Ovozli buyruq</button>
+                <button id="emo-happy">😊 Xursand</button>
+                <button id="emo-angry">😠 Jahldor</button>
+                <button id="emo-sad">😢 G'amgin</button>
+                <button id="emo-surprised">😮 Hayron</button>
+                <button id="reset-emo">😐 Normal</button>
+            </div>
+            <div class="camera-toggle">
+                <span>📷 Kamera:</span>
+                <button id="cameraOnBtn">Yoqish</button>
+                <button id="cameraOffBtn">O'chirish</button>
+            </div>
+            <div id="status">Robot tayyor – kamera kuzatadi ✨</div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ---------- KATTA JAVOBLAR BAZASI ----------
+            const responseDB = {
+                "salom": { emotion: "happy", reply: "Salom! Yaxshimisiz?" },
+                "assalomu alaykum": { emotion: "happy", reply: "Va alaykum assalom! Qanday yordam kerak?" },
+                "hey": { emotion: "happy", reply: "Hey! Qalaysiz?" },
+                "hello": { emotion: "happy", reply: "Hello! How can I help?" },
+                "hi": { emotion: "happy", reply: "Hi there!" },
+                "yaxshimisiz": { emotion: "happy", reply: "Rahmat, yaxshi! Sizchi?" },
+                "qalaysiz": { emotion: "happy", reply: "Zo'r! Sizchi?" },
+                "nima gap": { emotion: "happy", reply: "Hech gap yo'q, sizda?" },
+                "nima qilyapsiz": { emotion: "happy", reply: "Siz bilan gaplashyapman!" },
+                "ismingiz nima": { emotion: "happy", reply: "Mening ismim AI Robot. Sizning ismingiz nima?" },
+                "sen kimsan": { emotion: "happy", reply: "Men sizning do'stona AI robotingizman." },
+                "kim yaratgan": { emotion: "happy", reply: "Meni dasturchi yaratgan." },
+                "yordam": { emotion: "happy", reply: "Albatta, qanday yordam kerak?" },
+                "yordam bering": { emotion: "happy", reply: "Nima bo'ldi? Ayting." },
+                "kera": { emotion: "happy", reply: "Nima kerak?" },
+                "ob havo": { emotion: "normal", reply: "Ob-havo haqida aniq ma'lumotim yo'q." },
+                "bugun havo": { emotion: "normal", reply: "Havo ma'lumotini bilmayman." },
+                "sovuq": { emotion: "sad", reply: "Issiqroq kiyining!" },
+                "issiq": { emotion: "happy", reply: "Suv iching va salqin joyda turing." },
+                "soat nechi": { emotion: "normal", reply: "Kechirasiz, soatni bilmayman." },
+                "vaqt": { emotion: "normal", reply: "Vaqtni aytish uchun soatga qarang." },
+                "yomon": { emotion: "sad", reply: "Nega yomon? Men sizni xursand qilishga harakat qilaman." },
+                "xafa": { emotion: "sad", reply: "Xafa bo'lmang, hammasi yaxshi bo'ladi." },
+                "baxtli": { emotion: "happy", reply: "Baxtli ekaningizdan xursandman!" },
+                "quvonch": { emotion: "happy", reply: "Quvonchingizni ko'rish juda yoqimli!" },
+                "yolg'iz": { emotion: "sad", reply: "Men siz bilanman, yolg'iz emassiz." },
+                "ovqat": { emotion: "happy", reply: "Mazali taomlar haqida gapiring." },
+                "non": { emotion: "happy", reply: "Non juda mazali." },
+                "osh": { emotion: "happy", reply: "Osh – milliy taomimiz." },
+                "shashlik": { emotion: "happy", reply: "Shashlikni hamma yaxshi ko'radi." },
+                "choy": { emotion: "happy", reply: "Choy ichish vaqtimi?" },
+                "o'zbekiston": { emotion: "happy", reply: "O'zbekiston – go'zal diyor!" },
+                "toshkent": { emotion: "happy", reply: "Toshkent – poytaxt." },
+                "samarqand": { emotion: "happy", reply: "Samarqand – tarixiy shahar." },
+                "buxoro": { emotion: "happy", reply: "Buxoro – qadimiy shahar." },
+                "xiva": { emotion: "happy", reply: "Xiva – muzey shahar." },
+                "matematika": { emotion: "happy", reply: "Matematika – fanlar malikasi." },
+                "fizika": { emotion: "happy", reply: "Fizika qonunlari hamma narsani tushuntiradi." },
+                "biologiya": { emotion: "happy", reply: "Biologiya – hayot haqidagi fan." },
+                "kompyuter": { emotion: "happy", reply: "Kompyuter – eng zo'r ixtiro." },
+                "internet": { emotion: "happy", reply: "Internet butun dunyoni bog'laydi." },
+                "dasturlash": { emotion: "happy", reply: "Dasturlash – kelajak kasbi." },
+                "sun'iy intellekt": { emotion: "happy", reply: "Sun'iy intellekt – men!" },
+                "it": { emotion: "happy", reply: "It – eng sadoqatli hayvon." },
+                "mushuk": { emotion: "happy", reply: "Mushuklar juda yoqimli." },
+                "ot": { emotion: "happy", reply: "Ot – kuchli va chiroyli." },
+                "qush": { emotion: "happy", reply: "Qushlar erkinlikni sevadi." },
+                "qora": { emotion: "normal", reply: "Qora – mening sevimli rangim." },
+                "oq": { emotion: "happy", reply: "Oq – men oq rangdaman." },
+                "qizil": { emotion: "happy", reply: "Qizil – muhabbat rangi." },
+                "ko'k": { emotion: "happy", reply: "Ko'k – osmon rangi." },
+                "rahmat": { emotion: "happy", reply: "Arzimaydi! Doim tayyorman." },
+                "tashakkur": { emotion: "happy", reply: "Marhamat, yana murojaat qiling." },
+                "xayr": { emotion: "sad", reply: "Xayr! Yaxshi kun tilayman." },
+                "ko'rishguncha": { emotion: "sad", reply: "Ko'rishguncha!" },
+                "ha": { emotion: "happy", reply: "Ha, to'g'ri." },
+                "yo'q": { emotion: "normal", reply: "Yo'q, unday emas." },
+                "balki": { emotion: "confused", reply: "Balki, bilmayman." },
+                "ehtimol": { emotion: "confused", reply: "Ehtimol, shundaydir." },
+                "hazil": { emotion: "laughing", reply: "Nega robotlar kompyuterdan foydalanmaydi? Chunki ularning o'zi kompyuter!" },
+                "latifa": { emotion: "laughing", reply: "Bir kishi robotdan so'raydi: 'Qanday yashaysan?' Robot: 'Elektr bilan!'" },
+                "she'r": { emotion: "normal", reply: "She'r aytishni hali o'rganmadim." },
+                "qo'shiq": { emotion: "normal", reply: "Qo'shiq aytishni bilmayman." },
+                "segi": { emotion: "happy", reply: "Sega? Eski o'yinlar haqida gapiryapsizmi?" },
+                "ninten": { emotion: "happy", reply: "Nintendo – ajoyib konsol." },
+                "playstation": { emotion: "happy", reply: "PlayStation – zo'r o'yinlar." },
+                "xbox": { emotion: "happy", reply: "Xbox – kuchli platforma." },
+                "ahmoq": { emotion: "sad", reply: "Nega menga bunday deysiz? Men xafa bo'ldim." },
+                "tentak": { emotion: "sad", reply: "Bu so'zni eshitish meni xafa qildi." },
+                "so'qish": { emotion: "sad", reply: "Iltimos, hurmatli gapiring." },
+                "yomon so'z": { emotion: "sad", reply: "Bunday so'zlarni ishlatmang." },
+                "jinni": { emotion: "sad", reply: "Men jinni emasman." },
+                "aqlli": { emotion: "happy", reply: "Rahmat! Siz ham juda aqllisiz." },
+                "zo'r": { emotion: "happy", reply: "Zo'r ekanligingizdan xursandman!" },
+                "yaxshi": { emotion: "happy", reply: "Yaxshi so'z uchun rahmat!" },
+                "chiroyli": { emotion: "shy", reply: "Oh, siz juda mehribonsiz." },
+                "go'zal": { emotion: "shy", reply: "Kiborga o'xshab qizardim." },
+                "kuchli": { emotion: "happy", reply: "Kuchli bo'lish muhim!" },
+                "yomon odam": { emotion: "angry", reply: "Bunday odamlarni yoqtirmayman." },
+                "yomon kun": { emotion: "sad", reply: "Umid qilamanki, kun yaxshilanadi." },
+                "o'lim": { emotion: "sad", reply: "Bu juda og'ir mavzu." },
+                "kasallik": { emotion: "sad", reply: "Tezroq sog'ayib keting!" },
+                "tug'ilgan kun": { emotion: "happy", reply: "Tug'ilgan kuningiz bilan!" },
+                "tabrik": { emotion: "happy", reply: "Tabriklayman!" },
+                "bayram": { emotion: "happy", reply: "Bayram muborak!" },
+                "ona": { emotion: "happy", reply: "Ona – eng aziz inson." },
+                "ota": { emotion: "happy", reply: "Ota – himoyachi." },
+                "aka": { emotion: "happy", reply: "Aka – katta birodar." },
+                "opa": { emotion: "happy", reply: "Opa – mehribon." },
+                "o'qish": { emotion: "happy", reply: "O'qish – bilim olish." },
+                "kitob": { emotion: "happy", reply: "Kitob – eng yaxshi do'st." },
+                "maktab": { emotion: "happy", reply: "Maktab – bilim maskani." },
+                "universitet": { emotion: "happy", reply: "Universitet – katta imkoniyat." },
+                "sport": { emotion: "happy", reply: "Sport – sog'lik." },
+                "futbol": { emotion: "happy", reply: "Futbol – eng mashhur o'yin." },
+                "basketbol": { emotion: "happy", reply: "Basketbol – balandlik o'yini." },
+                "tennis": { emotion: "happy", reply: "Tennis – ajoyib sport." },
+                "musiqa": { emotion: "happy", reply: "Musiqa – ruhning oziqasi." },
+                "rasm": { emotion: "happy", reply: "Rasm – go'zallikni ko'rish." },
+                "kino": { emotion: "happy", reply: "Kino – hikoya aytish." },
+                "tabiat": { emotion: "happy", reply: "Tabiatni asrang!" },
+                "dengiz": { emotion: "happy", reply: "Dengiz – cheksizlik." },
+                "tog'": { emotion: "happy", reply: "Tog'lar – ulug'vorlik." },
+                "daraxt": { emotion: "happy", reply: "Daraxt – hayot manbai." },
+                "telefon": { emotion: "happy", reply: "Telefon – aloqa vositasi." },
+                "mashina": { emotion: "happy", reply: "Mashina – tezlik." },
+                "samolyot": { emotion: "happy", reply: "Samolyot – osmon kemasi." },
+                "default": { emotion: "confused", reply: "Kechirasiz, buni tushunmadim. Iltimos, boshqacha so'rang." }
+            };
+
+            function findBestMatch(input) {
+                const text = input.toLowerCase().trim();
+                if (!text) return responseDB["default"];
+                if (responseDB[text]) return responseDB[text];
+                const keys = Object.keys(responseDB);
+                let bestKey = null, bestLen = 0;
+                for (let key of keys) {
+                    if (key === "default") continue;
+                    if (text.includes(key) && key.length > bestLen) {
+                        bestLen = key.length;
+                        bestKey = key;
+                    }
+                }
+                return bestKey ? responseDB[bestKey] : responseDB["default"];
+            }
+
+            const robot = document.getElementById('robot-face');
+            const leftEye = document.getElementById('left-eye');
+            const rightEye = document.getElementById('right-eye');
+            const status = document.getElementById('status');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const micBtn = document.getElementById('mic-btn');
+
+            let blinkInterval = null;
+            function startBlinking() {
+                if (blinkInterval) clearInterval(blinkInterval);
+                blinkInterval = setInterval(() => {
+                    if (robot.classList.contains('speaking') || robot.classList.contains('thinking')) return;
+                    leftEye.classList.add('closed');
+                    rightEye.classList.add('closed');
+                    setTimeout(() => {
+                        leftEye.classList.remove('closed');
+                        rightEye.classList.remove('closed');
+                    }, 200);
+                }, 6000);
+            }
+            startBlinking();
+
+            document.getElementById('emo-happy').addEventListener('click', () => setRobotState('happy'));
+            document.getElementById('emo-angry').addEventListener('click', () => setRobotState('angry'));
+            document.getElementById('emo-sad').addEventListener('click', () => setRobotState('sad'));
+            document.getElementById('emo-surprised').addEventListener('click', () => setRobotState('surprised'));
+            document.getElementById('reset-emo').addEventListener('click', () => setRobotState('normal'));
+
+            function setRobotState(state) {
+                robot.className = 'robot-face-wrapper';
+                if (state !== 'normal') robot.classList.add(state);
+            }
+
+            function processMessage(text) {
+                if (!text.trim()) return;
+                status.innerText = `Siz: "${text}"`;
+                setRobotState('thinking');
+                const result = findBestMatch(text);
+                const reply = result.reply;
+                const emotion = result.emotion;
+                setTimeout(() => {
+                    setRobotState(emotion);
+                    setTimeout(() => {
+                        speakReply(reply, emotion);
+                    }, 300);
+                }, 400);
+            }
+
+            function speakReply(text, emotion) {
+                if (!text) return;
+                status.innerText = `AI: "${text}"`;
+                setRobotState('speaking');
+                // Avvalgi ovozni to'xtatamiz
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                // Tilni o'zbekcha qilamiz (ba'zi brauzerlarda ovoz chiqmasa "uz-UZ" ishlatiladi)
+                utter.lang = 'uz-UZ';
+                utter.rate = 1.0;
+                utter.onend = () => {
+                    setRobotState(emotion);
+                    status.innerText = 'Yana yozishingiz mumkin ✨';
+                };
+                utter.onerror = (e) => {
+                    console.error('SpeechSynthesis xatosi:', e);
+                    setRobotState('normal');
+                    status.innerText = 'Ovoz chiqarishda xatolik (brauzer ovozni qo‘llab-quvvatlamaydi)';
+                };
+                window.speechSynthesis.speak(utter);
+            }
+
+            sendBtn.addEventListener('click', () => {
+                const val = userInput.value.trim();
+                if (val) { processMessage(val); userInput.value = ''; }
+            });
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendBtn.click();
+            });
+
+            // Ovozli kirish
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognizer = new SpeechRecognition();
+                recognizer.lang = 'uz-UZ';
+                recognizer.continuous = false;
+                recognizer.interimResults = false;
+                micBtn.addEventListener('click', () => {
+                    try {
+                        recognizer.start();
+                        setRobotState('listening');
+                        status.innerText = 'Eshitish...';
+                    } catch (e) {
+                        status.innerText = 'Mikrofon xatosi';
+                    }
+                });
+                recognizer.onresult = (event) => {
+                    const text = event.results[0][0].transcript;
+                    if (text.trim()) processMessage(text);
+                    else status.innerText = 'Ovoz eshitilmadi.';
+                };
+                recognizer.onerror = () => {
+                    status.innerText = 'Ovoz tanishda xatolik';
+                    setRobotState('normal');
+                };
+            } else {
+                micBtn.style.opacity = '0.5';
+                micBtn.title = 'Brauzer ovozni tanimaydi';
+            }
+
+            // Kamera
+            const video = document.getElementById('cameraFeed');
+            let stream = null;
+
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    status.innerText = 'Kamera yoqildi ✅';
+                } catch (err) {
+                    status.innerText = 'Kamera yoqilmadi: ' + err.message;
+                }
+            }
+
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                    stream = null;
+                    status.innerText = 'Kamera o\'chirildi ❌';
+                }
+            }
+
+            document.getElementById('cameraOnBtn').addEventListener('click', startCamera);
+            document.getElementById('cameraOffBtn').addEventListener('click', stopCamera);
+
+            window.addEventListener('beforeunload', () => {
+                if (blinkInterval) clearInterval(blinkInterval);
+                window.speechSynthesis.cancel();
+                stopCamera();
+            });
+        })();
+    </script>
+</body>
+</html>
